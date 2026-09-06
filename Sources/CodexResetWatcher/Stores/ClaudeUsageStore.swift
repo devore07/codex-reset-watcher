@@ -90,6 +90,10 @@ final class ClaudeUsageStore: ObservableObject {
                 return
             }
             let incoming = try manager.readReport(now: date)
+            if incoming.waitingForUsage, !incoming.hasUsage, report == nil {
+                errorMessage = nil
+                return
+            }
             guard incoming.hasUsage else { throw ClaudeConnectionError.invalidReport }
             report = incoming
             errorMessage = nil

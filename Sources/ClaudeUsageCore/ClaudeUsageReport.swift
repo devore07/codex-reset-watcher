@@ -33,15 +33,17 @@ public struct ClaudeUsageReport: Codable, Equatable, Sendable {
     public let receivedAt: TimeInterval
     public let fiveHour: ClaudeUsageWindow?
     public let sevenDay: ClaudeUsageWindow?
+    public let waitingForUsage: Bool
 
-    public init(receivedAt: Date, fiveHour: ClaudeUsageWindow?, sevenDay: ClaudeUsageWindow?) {
+    public init(receivedAt: Date, fiveHour: ClaudeUsageWindow?, sevenDay: ClaudeUsageWindow?, waitingForUsage: Bool = false) {
         version = 1
         self.receivedAt = receivedAt.timeIntervalSince1970
         self.fiveHour = fiveHour
         self.sevenDay = sevenDay
+        self.waitingForUsage = waitingForUsage
     }
 
-    private enum CodingKeys: String, CodingKey { case version, receivedAt, fiveHour, sevenDay }
+    private enum CodingKeys: String, CodingKey { case version, receivedAt, fiveHour, sevenDay, waitingForUsage }
 
     public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
@@ -49,6 +51,7 @@ public struct ClaudeUsageReport: Codable, Equatable, Sendable {
         receivedAt = try values.decode(Double.self, forKey: .receivedAt)
         fiveHour = try? values.decode(ClaudeUsageWindow.self, forKey: .fiveHour)
         sevenDay = try? values.decode(ClaudeUsageWindow.self, forKey: .sevenDay)
+        waitingForUsage = try values.decodeIfPresent(Bool.self, forKey: .waitingForUsage) ?? false
     }
 
     public var receiptDate: Date { Date(timeIntervalSince1970: receivedAt) }
@@ -71,7 +74,10 @@ public struct ClaudeUsageReport: Codable, Equatable, Sendable {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         let envelope = try decoder.decode(Envelope.self, from: data)
-        return Self(receivedAt: now, fiveHour: envelope.rateLimits?.fiveHour, sevenDay: envelope.rateLimits?.sevenDay)
+        return Self(
+            receivedAt: now, fiveHour: envelope.rateLimits?.fiveHour, sevenDay: envelope.rateLimits?.sevenDay,
+            waitingForUsage: envelope.rateLimits?.hasWindowFields != true
+        )
     }
 
     private struct Envelope: Decodable {
@@ -79,16 +85,18 @@ public struct ClaudeUsageReport: Codable, Equatable, Sendable {
         enum CodingKeys: String, CodingKey { case rateLimits }
         init(from decoder: Decoder) throws {
             let values = try decoder.container(keyedBy: CodingKeys.self)
-            rateLimits = try? values.decode(Windows.self, forKey: .rateLimits)
+            rateLimits = try values.decodeIfPresent(Windows.self, forKey: .rateLimits)
         }
     }
 
     private struct Windows: Decodable {
         let fiveHour: ClaudeUsageWindow?
         let sevenDay: ClaudeUsageWindow?
+        let hasWindowFields: Bool
         enum CodingKeys: String, CodingKey { case fiveHour, sevenDay }
         init(from decoder: Decoder) throws {
             let values = try decoder.container(keyedBy: CodingKeys.self)
+            hasWindowFields = values.contains(.fiveHour) || values.contains(.sevenDay)
             fiveHour = try? values.decode(ClaudeUsageWindow.self, forKey: .fiveHour)
             sevenDay = try? values.decode(ClaudeUsageWindow.self, forKey: .sevenDay)
         }

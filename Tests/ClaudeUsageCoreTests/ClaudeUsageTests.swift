@@ -64,6 +64,15 @@ final class ClaudeUsageTests: XCTestCase {
         XCTAssertFalse(ClaudeConnectionManager.supports(version: "2.1.251.beta"))
     }
 
+    func testStartupReportIsDistinctFromMalformedUsage() throws {
+        XCTAssertTrue(try decode("{}").waitingForUsage)
+        XCTAssertTrue(try decode(#"{"rate_limits":{}}"#).waitingForUsage)
+        XCTAssertThrowsError(try decode(#"{"rate_limits":42}"#))
+        XCTAssertFalse(try decode(#"{"rate_limits":{"five_hour":{"used_percentage":-1}}}"#).waitingForUsage)
+        let data = try JSONEncoder().encode(decode("{}"))
+        XCTAssertTrue(try ClaudeUsageReport.decode(data, now: now).waitingForUsage)
+    }
+
     private func decode(_ string: String) throws -> ClaudeUsageReport {
         try ClaudeUsageReport.fromStatusLine(Data(string.utf8), now: now)
     }

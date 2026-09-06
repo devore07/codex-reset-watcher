@@ -83,7 +83,7 @@ these files entirely, first close terminal sessions and remove any project-level
 references to the helper, then delete the dedicated Claude support directory.
 After an app upgrade, disconnect and reconnect to install its updated helper.
 
-Only percentages, reset times, a receipt timestamp, and a schema version are
+Only percentages, reset times, a receipt timestamp, a startup-waiting flag, and a schema version are
 stored in `usage.json`, with private permissions and serialized atomic writes.
 Raw status-line input, transcripts, tokens, cookies, account IDs, and API keys
 are not stored. The app makes no Claude network requests. Existing status-line
@@ -92,7 +92,7 @@ commands continue to run under the user's original configuration.
 ## Install
 
 1. Download the versioned zip asset from the latest GitHub release, for example
-   `Codex.Reset.Watcher.v0.4.3.zip`.
+   `Codex.Reset.Watcher.v0.5.1.zip`.
 2. Unzip it.
 3. Drag `Codex Reset Watcher.app` into `/Applications`.
 4. Open it.
@@ -102,7 +102,7 @@ If macOS warns that the app is from an unidentified developer, right-click the a
 ## Build From Source
 
 ```bash
-git clone https://github.com/jordan-edai/codex-reset-watcher.git
+git clone https://github.com/devore07/codex-reset-watcher.git
 cd codex-reset-watcher
 ./script/build_and_run.sh --package
 open "dist/Codex Reset Watcher.app"

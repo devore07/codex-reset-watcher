@@ -37,5 +37,6 @@ if let command = try? manager.connection()?.previousCommand {
         guard let window, !window.hasExpired(at: receivedAt), let remaining = window.remainingPercentage else { return nil }
         return "\(title): \(Int(remaining.rounded(.down)))% remaining"
     }
-    print(parts.isEmpty ? "Claude usage unavailable" : parts.joined(separator: " | "))
+    let emptyMessage = report?.waitingForUsage == true ? "Waiting for Claude usage" : "Claude usage unavailable"
+    print(parts.isEmpty ? emptyMessage : parts.joined(separator: " | "))
 }
