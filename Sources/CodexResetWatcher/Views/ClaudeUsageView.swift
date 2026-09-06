@@ -24,9 +24,7 @@ struct ClaudeUsageRows: View {
                 }
             } else {
                 Text(
-                    store.connected
-                        ? "Use terminal Claude Code to receive a usage report."
-                        : "Requires terminal Claude Code; desktop-only sessions do not report usage here."
+                    store.emptyMessage
                 )
                 .font(CodexStyle.Typography.menuRowMeta)
                 .foregroundStyle(CodexPalette.secondaryText)
@@ -74,12 +72,14 @@ struct ClaudeDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: CodexStyle.Spacing.section) {
                 Text("Claude subscription usage").font(CodexStyle.Typography.appTitle)
-                Text("Source: Claude Code terminal · Pro / Max")
+                Text("Source: \(store.connected ? store.sourceLabel : store.selectedSource.rawValue) · Pro / Max")
                     .font(CodexStyle.Typography.body)
                     .foregroundStyle(CodexPalette.secondaryText)
                 ClaudeUsageRows(store: store)
                 Text(
-                    "These are observations from terminal Claude Code, not independent server checks. The Claude desktop Code tab does not supply this feed. Web or desktop usage appears only when a terminal session reports the shared subscription limits. Refresh rereads the local report."
+                    (store.desktopEnabled || (!store.connected && store.selectedSource == .desktop))
+                        ? "Checks the shared desktop and web subscription limits through Claude Desktop’s saved login every five minutes. Refresh requests a new reading. This uses an unofficial interface that may change."
+                        : "These are observations from terminal Claude Code, not independent server checks. The Claude desktop Code tab does not supply this feed. Web or desktop usage appears only when a terminal session reports the shared subscription limits. Refresh rereads the local report."
                 )
                 .font(CodexStyle.Typography.body)
                 if let error = store.errorMessage { Text(error).foregroundStyle(CodexPalette.warningText) }
@@ -96,16 +96,30 @@ struct ClaudeDetailView: View {
         VStack(alignment: .leading, spacing: CodexStyle.Spacing.stack) {
             Text("Connection").font(CodexStyle.Typography.sectionTitle)
             if !store.connected {
-                Text(
-                    "Connect installs a local helper and updates the selected Claude settings. An existing status line is preserved. Terminal Claude Code 2.1.251 or later is required; the desktop app alone is not sufficient."
-                )
-                .font(CodexStyle.Typography.body)
-                pathControl("Claude configuration", value: $store.configurationPath, directory: true)
-                pathControl("Claude Code executable", value: $store.executablePath, directory: false)
+                Picker("Usage source", selection: $store.selectedSource) {
+                    ForEach(ClaudeUsageSource.allCases) { source in Text(source.rawValue).tag(source) }
+                }
+                if store.selectedSource == .desktop {
+                    Text(
+                        "Connect reads Claude Desktop’s saved login using macOS Keychain and sends its session cookie only to claude.ai for read-only usage checks. Credentials stay in memory. No terminal or browser extension is required. macOS may ask you to allow Keychain access."
+                    )
+                    .font(CodexStyle.Typography.body)
+                } else {
+                    Text(
+                        "Connect installs a local helper and updates the selected Claude settings. An existing status line is preserved. Terminal Claude Code 2.1.251 or later is required; the desktop app alone is not sufficient."
+                    )
+                    .font(CodexStyle.Typography.body)
+                    pathControl("Claude configuration", value: $store.configurationPath, directory: true)
+                    pathControl("Claude Code executable", value: $store.executablePath, directory: false)
+                }
             }
             HStack {
                 if store.connected {
-                    Button("Refresh") { store.reload() }
+                    Button("Refresh") { store.requestRefresh() }
+                        .disabled(store.isRefreshingDesktop)
+                    if store.desktopEnabled, store.errorMessage != nil {
+                        Button("Reconnect Desktop") { Task { await store.connectDesktop() } }
+                    }
                     Button("Disconnect Claude") { store.disconnect() }
                 } else {
                     Button("Connect Claude") { Task { await store.connect() } }
@@ -117,7 +131,9 @@ struct ClaudeDetailView: View {
             if let message = store.setupMessage { Text(message).font(CodexStyle.Typography.body) }
             if store.connected {
                 Text(
-                    "If no report arrives after a Claude Code response, check that you are signed into Pro/Max and that project settings do not override the user status line. This view shows one subscription; it does not identify or track multiple Claude accounts."
+                    store.desktopEnabled
+                        ? "Keep Claude Desktop signed in. Checks can continue while you use the web app. Usage values are held in memory and fetched again after the watcher restarts. Disconnect stops checks without signing you out of Claude."
+                        : "If no report arrives after a Claude Code response, check that you are signed into Pro/Max and that project settings do not override the user status line. This view shows one subscription; it does not identify or track multiple Claude accounts."
                 )
                 .font(CodexStyle.Typography.caption)
                 .foregroundStyle(CodexPalette.secondaryText)

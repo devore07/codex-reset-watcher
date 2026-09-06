@@ -2,6 +2,12 @@ import AppKit
 import ClaudeUsageCore
 import Foundation
 
+enum ClaudeUsageSource: String, CaseIterable, Identifiable {
+    case desktop = "Claude Desktop"
+    case terminal = "Claude Code terminal"
+    var id: String { rawValue }
+}
+
 @MainActor
 final class ClaudeUsageStore: ObservableObject {
     @Published private(set) var report: ClaudeUsageReport?
@@ -14,6 +20,21 @@ final class ClaudeUsageStore: ObservableObject {
     @Published var showingClaude = false
     @Published var configurationPath: String
     @Published var executablePath: String
+
+    @Published var selectedSource: ClaudeUsageSource = .desktop
+    @Published private(set) var desktopEnabled = false
+    @Published private(set) var isRefreshingDesktop = false
+    var desktopClient = ClaudeDesktopClient()
+    private var desktopFingerprint: Data?
+    private var lastDesktopAttempt: Date?
+    private var retryAfter: Date?
+    private var desktopGeneration = UUID()
+    private var desktopEnabledURL: URL { manager.directory.appendingPathComponent("desktop-enabled") }
+    var sourceLabel: String { desktopEnabled ? "Claude Desktop" : "Claude Code terminal" }
+    var emptyMessage: String {
+        if !connected { return "Connect Claude Desktop or a terminal Claude Code feed." }
+        return desktopEnabled ? "Waiting for a Claude Desktop usage check." : "Use terminal Claude Code to receive a usage report."
+    }
 
     let manager: ClaudeConnectionManager
     private var observation: ClaudeDirectoryObservation?
@@ -34,16 +55,18 @@ final class ClaudeUsageStore: ObservableObject {
         let candidates =
             [home.appendingPathComponent(".local/bin/claude").path, "/opt/homebrew/bin/claude", "/usr/local/bin/claude"] + bundled
         executablePath = candidates.first(where: FileManager.default.isExecutableFile(atPath:)) ?? candidates[0]
+        desktopEnabled = (try? Data(contentsOf: desktopEnabledURL)) == Data("enabled".utf8)
+        if !desktopEnabled, (try? manager.connection()?.enabled) == true { selectedSource = .terminal }
     }
 
     var statusTitle: String {
         if configurationChanged { return "Claude connection changed" }
         if !connected { return "Connect Claude" }
         if errorMessage != nil { return "Claude usage unavailable" }
-        guard let report else { return "Waiting for Claude Code" }
+        guard let report else { return desktopEnabled ? "Checking Claude Desktop" : "Waiting for Claude Code" }
         if report.isOld(at: now) { return "Last reported" }
         if report.isPartial { return "Partial usage report" }
-        return "Reported by Claude Code"
+        return desktopEnabled ? "Checked via Claude Desktop" : "Reported by Claude Code"
     }
 
     var receiptLabel: String? {
@@ -72,6 +95,14 @@ final class ClaudeUsageStore: ObservableObject {
 
     func reload(at date: Date = Date()) {
         now = date
+        if desktopEnabled {
+            connected = true
+            configurationChanged = false
+            if !isRefreshingDesktop, lastDesktopAttempt.map({ date.timeIntervalSince($0) >= 300 }) ?? true {
+                Task { await refreshDesktop() }
+            }
+            return
+        }
         do {
             let connection = try manager.connection()
             connected = connection?.enabled == true
@@ -105,7 +136,75 @@ final class ClaudeUsageStore: ObservableObject {
         }
     }
 
+    func requestRefresh() {
+        if desktopEnabled { Task { await refreshDesktop(force: true) } } else { reload() }
+    }
+
+    func connectDesktop() async {
+        guard !isConnecting, !isRefreshingDesktop else { return }
+        isConnecting = true
+        defer { isConnecting = false }
+        await refreshDesktop(force: true, connecting: true)
+    }
+
+    func refreshDesktop(force: Bool = false, connecting: Bool = false) async {
+        guard !isRefreshingDesktop, desktopEnabled || connecting else { return }
+        if let retryAfter, retryAfter > Date() { return }
+        if !force, let lastDesktopAttempt, Date().timeIntervalSince(lastDesktopAttempt) < 300 { return }
+        isRefreshingDesktop = true
+        lastDesktopAttempt = Date()
+        let generation = desktopGeneration
+        let client = desktopClient
+        defer { isRefreshingDesktop = false }
+        do {
+            let auth = try await Task.detached { try client.credentials.load(allowInteraction: connecting) }.value
+            guard generation == desktopGeneration else { return }
+            if auth.fingerprint != desktopFingerprint { report = nil }
+            desktopFingerprint = auth.fingerprint
+            let incoming = try await Task.detached { try await client.fetch(session: auth) }.value
+            guard generation == desktopGeneration else { return }
+            if connecting {
+                // Switching sources requires disconnecting the terminal feed first.
+                guard (try manager.connection()?.enabled) != true else { throw ClaudeConnectionError.anotherConnection }
+                try FileManager.default.createDirectory(
+                    at: manager.directory, withIntermediateDirectories: true,
+                    attributes: [.posixPermissions: 0o700])
+                try Data("enabled".utf8).write(to: desktopEnabledURL, options: .atomic)
+                try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: desktopEnabledURL.path)
+                desktopEnabled = true
+                selectedSource = .desktop
+                setupMessage = "Connected to Claude Desktop. Usage checks run every five minutes."
+            }
+            report = incoming.report
+            connected = true
+            configurationChanged = false
+            errorMessage = nil
+            retryAfter = nil
+            now = Date()
+        } catch {
+            guard generation == desktopGeneration else { return }
+            let message =
+                (error as? ClaudeDesktopError)?.localizedDescription
+                ?? (error as? ClaudeConnectionError)?.localizedDescription
+                ?? "Could not check Claude usage. Check your connection and try again."
+            if let failure = error as? ClaudeDesktopError {
+                switch failure {
+                case .loginUnavailable, .loginRejected, .keychainAccess, .cookieFormat, .accountChanged:
+                    report = nil
+                    desktopFingerprint = nil
+                case .rateLimited: retryAfter = Date().addingTimeInterval(900)
+                default: break
+                }
+            }
+            if connecting { setupMessage = message } else { errorMessage = message }
+        }
+    }
+
     func connect() async {
+        if selectedSource == .desktop {
+            await connectDesktop()
+            return
+        }
         guard !isConnecting else { return }
         isConnecting = true
         setupMessage = nil
@@ -130,6 +229,21 @@ final class ClaudeUsageStore: ObservableObject {
     }
 
     func disconnect() {
+        if desktopEnabled {
+            do {
+                try FileManager.default.removeItem(at: desktopEnabledURL)
+                desktopGeneration = UUID()
+                desktopEnabled = false
+                connected = false
+                report = nil
+                desktopFingerprint = nil
+                lastDesktopAttempt = nil
+                retryAfter = nil
+                errorMessage = nil
+                setupMessage = "Disconnected from Claude Desktop. Its login was not changed."
+            } catch { setupMessage = "Could not save the disconnected state. Check file permissions." }
+            return
+        }
         do {
             try manager.disconnect()
             setupMessage = "Disconnected. Any replacement status-line command was preserved."

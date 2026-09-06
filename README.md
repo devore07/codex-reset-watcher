@@ -2,7 +2,7 @@
 
 <img src="Assets/AppIcon.png" width="128" alt="Codex Reset Watcher icon">
 
-Unofficial macOS utility for checking Codex rate-limit windows and banked reset credits, with optional Claude Pro/Max usage from terminal Claude Code.
+Unofficial macOS utility for checking Codex rate-limit windows and banked reset credits, with optional Claude Pro/Max usage through Claude Desktop or terminal Claude Code.
 
 It reads your existing local Codex Desktop login from `~/.codex/auth.json`, calls the same internal Codex Desktop endpoints used by the app, and shows:
 
@@ -36,7 +36,50 @@ No API key is required.
 
 ## Claude subscription usage
 
-The optional Claude integration shows five-hour and weekly remaining percentages,
+Choose **Claude Desktop** to check usage without a CLI or browser extension:
+
+1. Sign into the Claude desktop app with your Pro/Max subscription.
+2. In the watcher, select **Claude subscription**, choose **Claude Desktop**, and
+   click **Connect Claude**.
+3. Allow access to **Claude Safe Storage** if macOS requests it. Choose the
+   system permission appropriate for you; the watcher never changes Keychain
+   access rules itself. If access is denied or later unavailable, use
+   **Reconnect Desktop** to try again.
+
+This source reads only `sessionKey` and `lastActiveOrg` from Claude Desktop's
+local cookie database, opened read-only, and uses macOS Keychain to decrypt
+Chromium v10 cookies (supported database schemas 23 and 24). Schema 24's domain
+hash is verified. It sends the session cookie over HTTPS only to
+`https://claude.ai/api/organizations/<organization>/usage`. Redirects are refused.
+This is an **unofficial internal endpoint**, not a supported Anthropic public API;
+login, encryption, or endpoint changes may stop the connection from working.
+
+Checks run every five minutes and on **Refresh**, including when you use only
+Claude desktop or web. The desktop app must have an existing saved login; it
+need not supply terminal activity. HTTP 429 pauses all usage checks, including
+manual refresh, for 15 minutes. No messages are sent, no credits are redeemed,
+and no account settings are changed. API billing and model-specific allowances
+are excluded. Only one currently selected Claude subscription is shown.
+
+Session cookies, Keychain secrets, organization identifiers, and raw responses
+stay in memory and are never logged or written to watcher storage. Desktop
+reports also stay in memory; restart fetches them again. The only saved Desktop
+setting is a private `desktop-enabled` marker in the watcher's Claude support
+directory. The request uses a stateless session without shared cookies or cache.
+Desktop account changes discard previous account values; unavailable login
+states clear them. Network failures retain the original receipt timestamp.
+**Disconnect Claude** stops polling without changing Claude's login. Disconnect
+before switching sources; the terminal helper remains credential-free.
+
+The implementation was validated on macOS with a real Desktop login on
+2026-09-06: a single read-only request returned both usage windows. Comparison
+against the visible Claude Usage screen remains a manual verification step.
+Technical references: [Chromium cookie format](https://chromium.googlesource.com/chromium/src/net/+/master/extras/sqlite/sqlite_persistent_cookie_store.cc)
+and an [existing independent Desktop usage implementation](https://github.com/skibidiskib/claude-web-usage).
+
+### Alternative: terminal status-line feed
+
+The terminal source shows five-hour and weekly remaining percentages,
 reset times, and when a local report was received. The menu-bar title continues
 to show Codex weekly capacity. Claude and Codex appear as separate groups in
 the dropdown; select **Claude subscription** in the desktop sidebar for setup.
@@ -86,7 +129,7 @@ After an app upgrade, disconnect and reconnect to install its updated helper.
 Only percentages, reset times, a receipt timestamp, a startup-waiting flag, and a schema version are
 stored in `usage.json`, with private permissions and serialized atomic writes.
 Raw status-line input, transcripts, tokens, cookies, account IDs, and API keys
-are not stored. The app makes no Claude network requests. Existing status-line
+are not stored. The terminal source makes no Claude network requests. Existing status-line
 commands continue to run under the user's original configuration.
 
 ## Install

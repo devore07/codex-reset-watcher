@@ -10,9 +10,9 @@ Codex usage limits and reset credits. Keep changes scoped to that product.
 - Public GitHub repo: `https://github.com/jordan-edai/codex-reset-watcher`
 - Canonical local path: `/Users/everydayai/Documents/!Codex Projects/Rate Refresher Project`
 - Compatibility path: `/Users/everydayai/Documents/Rate Refresher Project`
-- Release version: `v0.5.1`
+- Release version: `v0.6.0`
 - Check `git log --oneline --decorate -5` for the current `main` commit; this
-  note tracks the repo state through the `v0.5.1` terminal Claude usage feed.
+  note tracks the repo state through the `v0.6.0` Claude Desktop and terminal usage sources.
 - App bundle version is set in `script/build_and_run.sh`.
 
 ## Product Decisions
@@ -150,8 +150,17 @@ Codex usage limits and reset credits. Keep changes scoped to that product.
 
 ### Claude integration
 
-- Claude monitoring uses the terminal Claude Code status-line feed, not the
-  desktop Code tab. Preserve the explicit terminal requirement in setup.
+- Claude monitoring offers optional Desktop login polling or the terminal
+  status-line feed. Keep sources independent; disconnect before switching.
+- Desktop requests are GET-only to the exact claude.ai organization usage URL,
+  with redirects rejected. Read only the two required Claude cookies; verify
+  encrypted domain binding and reject unsupported schemas. Credentials, raw
+  responses, and Desktop reports stay in memory. Never print Keychain secrets
+  or session cookies. Only explicit Connect/Reconnect may prompt for Keychain.
+- Preserve five-minute polling, 15-minute HTTP 429 backoff, prior timestamps on
+  network failure, and clearing old usage when the Desktop login changes.
+- Tests use synthetic cookie databases and injected network/Keychain behavior;
+  real-credential tests require explicit session-cookie/destination approval.
 - Keep the Claude helper credential-free and retain only derived usage reports.
   Connection metadata contains only the prior status-line configuration needed
   for forwarding/restoration. Never overwrite a later replacement command.

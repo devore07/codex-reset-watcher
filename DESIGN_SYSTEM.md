@@ -58,8 +58,11 @@ the visual priority.
   intrinsic content height; do not add menu scrolling to compensate for growth.
 - Reset credits and advice are labeled Codex. Claude labels distinguish terminal
   observations from server checks, show receipt times, and replace expired
-  percentages with an awaiting-update state. Claude setup explicitly requires
-  terminal Claude Code; the desktop Code tab alone does not provide the feed.
+  percentages with an awaiting-update state. Claude setup offers
+  either Desktop login polling or terminal Claude Code. Show the selected source
+  explicitly. Desktop setup explains Keychain access and the internal endpoint;
+  Refresh fetches server usage for Desktop and rereads observations for terminal.
+  Source switching requires disconnecting first.
 - Cached snapshots and stale cleanup stay in the full desktop app, not the menu
   dropdown.
 - Preserve count honesty: when a server count is higher than decoded display

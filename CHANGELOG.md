@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.6.0
+
+- Add optional Claude Desktop usage polling using the existing desktop login;
+  no CLI or browser extension is required. Five-hour and weekly limits include
+  desktop and web activity on the same subscription.
+- Explain Keychain access in Connect, keep credentials and Desktop reports in
+  memory, reject redirects, validate cookie domain hashes, and pause polling on
+  rate limits. Preserve terminal status-line setup as an alternative source.
+- Clear prior values when Desktop login changes; retain receipt times on network
+  failures. Disconnect stops checks without changing Claude's login.
+- Add synthetic cookie, request, response, and connection lifecycle tests. A live
+  read-only request on 2026-09-06 returned both usage windows successfully.
+
 ## 0.5.1 - 2026-09-06
 
 - Keeps the initial terminal status-line report in **Waiting for Claude Code**
