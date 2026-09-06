@@ -32,6 +32,7 @@ enum CodexStyle {
         static let mainWindowDefaultWidth: CGFloat = 946
         static let mainWindowDefaultHeight: CGFloat = 682
         static let menuWidth: CGFloat = 470
+        static let multiProviderMenuWidth: CGFloat = 820
         static let menuIconColumn: CGFloat = 32
         static let menuMetricColumn: CGFloat = 104
         static let menuDateColumn: CGFloat = 142

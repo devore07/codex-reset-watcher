@@ -6,6 +6,7 @@ struct CodexResetWatcherApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @AppStorage("appearanceMode") private var appearanceModeRawValue = CodexAppearanceMode.auto.rawValue
     @StateObject private var store = ResetCreditsStore()
+    @StateObject private var claudeStore = ClaudeUsageStore()
     @StateObject private var mainWindowController = MainWindowController()
 
     private var appearanceMode: CodexAppearanceMode {
@@ -14,7 +15,7 @@ struct CodexResetWatcherApp: App {
 
     var body: some Scene {
         WindowGroup("Codex Reset Watcher", id: "main") {
-            ContentView(store: store, appearanceModeRawValue: $appearanceModeRawValue)
+            ContentView(store: store, claudeStore: claudeStore, appearanceModeRawValue: $appearanceModeRawValue)
                 .preferredColorScheme(appearanceMode.colorScheme)
                 .onAppear {
                     applyAppearanceMode()
@@ -35,6 +36,7 @@ struct CodexResetWatcherApp: App {
                 )
                 .task {
                     store.start()
+                    claudeStore.start()
                 }
         }
         .defaultSize(
@@ -45,6 +47,7 @@ struct CodexResetWatcherApp: App {
             CommandGroup(replacing: .newItem) {}
             CommandMenu("Codex Reset Watcher") {
                 Button("Refresh") {
+                    claudeStore.reload()
                     Task {
                         await store.refresh()
                     }
@@ -56,18 +59,22 @@ struct CodexResetWatcherApp: App {
         MenuBarExtra {
             MenuBarStatusView(
                 store: store,
+                claudeStore: claudeStore,
                 mainWindowController: mainWindowController,
                 appearanceModeRawValue: $appearanceModeRawValue
             )
                 .preferredColorScheme(appearanceMode.colorScheme)
                 .onAppear {
                     applyAppearanceMode()
+                    claudeStore.reload()
                 }
                 .onChange(of: appearanceModeRawValue) {
                     applyAppearanceMode()
                 }
                 .task {
                     store.start()
+                    claudeStore.start()
+                    claudeStore.reload()
                 }
         } label: {
             HStack(spacing: 4) {

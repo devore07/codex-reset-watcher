@@ -1,0 +1,10 @@
+*
+!Package.swift
+!Sources/
+!Sources/ClaudeUsageCore/
+!Sources/ClaudeUsageCore/**
+!Sources/ClaudeUsageBridge/
+!Sources/ClaudeUsageBridge/**
+!Tests/
+!Tests/ClaudeUsageCoreTests/
+!Tests/ClaudeUsageCoreTests/**

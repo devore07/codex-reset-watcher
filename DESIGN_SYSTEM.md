@@ -52,6 +52,14 @@ the visual priority.
   that creates empty space above or below its visible rows.
 - Menu section order is `Display settings`, `Current limits`, then
   `Banked Resets Expiration`, followed by the usage nudge.
+- `Current limits` groups Codex and optional Claude usage separately. When Claude
+  is connected, use the wider `multiProviderMenuWidth` token, side-by-side provider
+  groups, and two columns of reset cards. Preserve readable row heights and
+  intrinsic content height; do not add menu scrolling to compensate for growth.
+- Reset credits and advice are labeled Codex. Claude labels distinguish terminal
+  observations from server checks, show receipt times, and replace expired
+  percentages with an awaiting-update state. Claude setup explicitly requires
+  terminal Claude Code; the desktop Code tab alone does not provide the feed.
 - Cached snapshots and stale cleanup stay in the full desktop app, not the menu
   dropdown.
 - Preserve count honesty: when a server count is higher than decoded display
@@ -112,3 +120,5 @@ Then open the real macOS menu bar dropdown and check:
 - light and dark system appearances still have enough contrast
 - loading, partial endpoint failure, missing auth, blocked limits, and cached or
   stale snapshots remain understandable without relying on color alone
+- connected Claude with both windows plus four reset cards fits without clipping;
+  also check partial, waiting, configuration-changed, and expired Claude states

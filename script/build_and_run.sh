@@ -5,7 +5,7 @@ MODE="${1:-run}"
 PRODUCT_NAME="CodexResetWatcher"
 APP_NAME="Codex Reset Watcher"
 BUNDLE_ID="com.jordanedai.codex-reset-watcher"
-VERSION="0.4.4"
+VERSION="0.5.0"
 BUILD_NUMBER="1"
 MIN_SYSTEM_VERSION="14.0"
 CONFIGURATION="${CONFIGURATION:-debug}"
@@ -18,6 +18,7 @@ APP_BUNDLE="$DIST_DIR/$APP_NAME.app"
 APP_CONTENTS="$APP_BUNDLE/Contents"
 APP_MACOS="$APP_CONTENTS/MacOS"
 APP_RESOURCES="$APP_CONTENTS/Resources"
+APP_HELPERS="$APP_CONTENTS/Helpers"
 APP_BINARY="$APP_MACOS/$PRODUCT_NAME"
 INFO_PLIST="$APP_CONTENTS/Info.plist"
 APP_ICON="$ROOT_DIR/Assets/AppIcon.icns"
@@ -36,9 +37,11 @@ if [[ "$CONFIGURATION" == "release" ]]; then
   swift build "${RELEASE_BUILD_ARGS[@]}"
   BUILD_BIN_PATH="$(swift build "${RELEASE_BUILD_ARGS[@]}" --show-bin-path)"
   BUILD_BINARY="$BUILD_BIN_PATH/$PRODUCT_NAME"
+  HELPER_BINARY="$BUILD_BIN_PATH/ClaudeUsageBridge"
 else
   swift build --scratch-path "$SCRATCH_PATH" --jobs "$SWIFT_BUILD_JOBS"
   BUILD_BINARY="$SCRATCH_PATH/debug/$PRODUCT_NAME"
+  HELPER_BINARY="$SCRATCH_PATH/debug/ClaudeUsageBridge"
 fi
 
 if [[ ! -x "$BUILD_BINARY" ]]; then
@@ -47,15 +50,25 @@ if [[ ! -x "$BUILD_BINARY" ]]; then
 fi
 
 rm -rf "$APP_BUNDLE"
-mkdir -p "$APP_MACOS" "$APP_RESOURCES"
+mkdir -p "$APP_MACOS" "$APP_RESOURCES" "$APP_HELPERS"
 cp "$BUILD_BINARY" "$APP_BINARY"
+cp "$HELPER_BINARY" "$APP_HELPERS/ClaudeUsageBridge"
 chmod +x "$APP_BINARY"
+chmod +x "$APP_HELPERS/ClaudeUsageBridge"
 if [[ "$CONFIGURATION" == "release" ]]; then
   /usr/bin/strip -S -x "$APP_BINARY"
+  /usr/bin/strip -S -x "$APP_HELPERS/ClaudeUsageBridge"
   RELEASE_ARCHS="$(/usr/bin/lipo -archs "$APP_BINARY")"
   for REQUIRED_ARCH in arm64 x86_64; do
     if [[ " $RELEASE_ARCHS " != *" $REQUIRED_ARCH "* ]]; then
       echo "Release executable is missing $REQUIRED_ARCH: $RELEASE_ARCHS" >&2
+      exit 1
+    fi
+  done
+  HELPER_ARCHS="$(/usr/bin/lipo -archs "$APP_HELPERS/ClaudeUsageBridge")"
+  for REQUIRED_ARCH in arm64 x86_64; do
+    if [[ " $HELPER_ARCHS " != *" $REQUIRED_ARCH "* ]]; then
+      echo "Claude helper is missing $REQUIRED_ARCH: $HELPER_ARCHS" >&2
       exit 1
     fi
   done
@@ -81,6 +94,7 @@ fi
 /usr/bin/plutil -insert NSPrincipalClass -string "NSApplication" "$INFO_PLIST"
 /usr/bin/plutil -insert NSHumanReadableCopyright -string "Copyright © 2026 Jordan Wilson. Released under the MIT License." "$INFO_PLIST"
 
+/usr/bin/codesign --force --sign - "$APP_HELPERS/ClaudeUsageBridge" >/dev/null
 /usr/bin/codesign --force --sign - "$APP_BUNDLE" >/dev/null
 
 open_app() {

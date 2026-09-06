@@ -148,6 +148,22 @@ Codex usage limits and reset credits. Keep changes scoped to that product.
 
 ## Verification Commands
 
+### Claude integration
+
+- Claude monitoring uses the terminal Claude Code status-line feed, not the
+  desktop Code tab. Preserve the explicit terminal requirement in setup.
+- Keep the Claude helper credential-free and retain only derived usage reports.
+  Connection metadata contains only the prior status-line configuration needed
+  for forwarding/restoration. Never overwrite a later replacement command.
+- Portable Swift helper/connection tests run with
+  `docker build -t codex-reset-watcher:claude-tests .` and
+  `docker run --rm codex-reset-watcher:claude-tests`.
+- The native SwiftUI app needs macOS/Xcode and cannot be built in the Linux
+  container. Use the existing native verification commands below for it.
+- Run `bash script/verify_claude_package.sh` after packaging; it checks both
+  helper architectures, signing, private-string patterns, and synthetic command
+  forwarding. No test should modify the user's real Claude settings.
+
 Run tests:
 
 ```bash
