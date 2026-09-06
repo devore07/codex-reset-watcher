@@ -6,6 +6,22 @@ import XCTest
 final class ClaudeUsageTests: XCTestCase {
     let now = Date(timeIntervalSince1970: 1_800_000_000)
 
+    func testFableDerivedRoundTripAndLegacyReports() throws {
+        let legacy = try ClaudeUsageReport.decode(
+            Data(#"{"version":1,"receivedAt":1800000000,"fiveHour":{"usedPercentage":50}}"#.utf8), now: now)
+        XCTAssertTrue(legacy.fableWeekly.isEmpty)
+        let report = ClaudeUsageReport(
+            receivedAt: now, fiveHour: legacy.fiveHour, sevenDay: nil,
+            fableWeekly: [ClaudeFableWindow(model: .fable, window: ClaudeUsageWindow(usedPercentage: 75, resetsAt: 1_800_000_100))])
+        let decoded = try ClaudeUsageReport.decode(JSONEncoder().encode(report), now: now)
+        XCTAssertEqual(decoded, report)
+        XCTAssertEqual(decoded.fableWeekly[0].window.remainingPercentage, 25)
+        XCTAssertTrue(decoded.isOld(at: now.addingTimeInterval(300)))
+        let terminal = try decode(
+            #"{"rate_limits":{"five_hour":{"used_percentage":50},"limits":[{"percent":80,"scope":{"model":{"display_name":"Fable"}}}]}}"#)
+        XCTAssertTrue(terminal.fableWeekly.isEmpty, "Terminal input must not invent undocumented model-scoped usage")
+    }
+
     func testSubscriptionFieldsAndFractionalRemaining() throws {
         let report = try decode(
             #"{"rate_limits":{"five_hour":{"used_percentage":23.5,"resets_at":1800000100},"seven_day":{"used_percentage":100,"resets_at":1800600000}}}"#

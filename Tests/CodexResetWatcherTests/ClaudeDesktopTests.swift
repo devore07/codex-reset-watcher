@@ -13,6 +13,56 @@ final class ClaudeDesktopTests: XCTestCase {
         #"{"five_hour":{"utilization":27.5,"resets_at":"2026-09-07T01:00:00.123Z"},"seven_day":{"utilization":61,"resets_at":"2026-09-10T12:00:00Z"},"ignored":"synthetic-private-field"}"#
             .utf8)
 
+    func testFableScopedUsageIsIndependentAndMinimized() throws {
+        let data = Data(
+            #"{"five_hour":{"utilization":10},"seven_day":{"utilization":20,"resets_at":"2026-09-10T12:00:00Z"},"limits":[null,42,{"kind":"weekly_scoped","scope":{"model":{"display_name":"Fable","private_id":"do-not-store"}},"percent":37.5,"resets_at":"2026-09-11T14:00:00.123Z"},{"kind":"weekly_scoped","scope":{"model":{"display_name":"Sonnet"}},"percent":90},{"kind":"daily","scope":{"model":{"display_name":"Fable"}},"percent":99}]}"#
+                .utf8)
+        let report = try ClaudeDesktopClient.decode(data)
+        XCTAssertEqual(report.fableWeekly.count, 1)
+        XCTAssertEqual(report.fableWeekly.first?.window.remainingPercentage, 62.5)
+        XCTAssertNotEqual(report.fableWeekly.first?.window.resetDate, report.sevenDay?.resetDate)
+        XCTAssertFalse(report.isPartial)
+        let persisted = String(decoding: try JSONEncoder().encode(report), as: UTF8.self)
+        XCTAssertFalse(persisted.contains("do-not-store"))
+        XCTAssertFalse(persisted.contains("Sonnet"))
+        XCTAssertFalse(persisted.contains("scope"))
+    }
+
+    func testMissingMalformedAndDuplicateFableLimits() throws {
+        let without = try ClaudeDesktopClient.decode(body)
+        XCTAssertTrue(without.fableWeekly.isEmpty)
+        XCTAssertFalse(without.isPartial)
+        for percent in ["-1", "101", "true", "null", "\"50\""] {
+            let data = Data(
+                ("{\"five_hour\":{\"utilization\":10},\"seven_day\":{\"utilization\":20},\"limits\":[{\"kind\":\"weekly_scoped\",\"scope\":{\"model\":{\"display_name\":\"Fable\"}},\"percent\":\(percent)}]}")
+                    .utf8)
+            let report = try ClaudeDesktopClient.decode(data)
+            XCTAssertNil(report.fableWeekly.first?.window.usedPercentage)
+            XCTAssertEqual(report.sevenDay?.remainingPercentage, 80)
+            XCTAssertTrue(report.isPartial)
+        }
+        let duplicates = try ClaudeDesktopClient.decode(
+            Data(
+                #"{"five_hour":{"utilization":10},"limits":[{"kind":"weekly_scoped","scope":{"model":{"display_name":"Fable"}},"percent":20},{"kind":"weekly_scoped","scope":{"model":{"display_name":"fable"}},"percent":30}]}"#
+                    .utf8))
+        XCTAssertEqual(duplicates.fableWeekly.count, 1)
+        XCTAssertNil(duplicates.fableWeekly.first?.window.usedPercentage)
+        let missingReset = try ClaudeDesktopClient.decode(
+            Data(
+                #"{"seven_day":{"utilization":20,"resets_at":"2026-09-10T12:00:00Z"},"limits":[{"kind":"weekly_scoped","scope":{"model":{"display_name":"Fable"}},"percent":0}]}"#
+                    .utf8))
+        XCTAssertEqual(missingReset.fableWeekly.first?.window.remainingPercentage, 100)
+        XCTAssertNil(missingReset.fableWeekly.first?.window.resetDate)
+        let expired = try ClaudeDesktopClient.decode(
+            Data(
+                #"{"limits":[{"kind":"weekly_scoped","scope":{"model":{"display_name":"Fable 5.1"}},"percent":100,"resets_at":"2026-01-01T00:00:00Z"}]}"#
+                    .utf8))
+        XCTAssertTrue(expired.hasUsage)
+        XCTAssertTrue(expired.isPartial)
+        XCTAssertTrue(expired.fableWeekly[0].window.hasExpired(at: Date(timeIntervalSince1970: 1_800_000_000)))
+        XCTAssertEqual(expired.fableWeekly[0].model, .fiveOne)
+    }
+
     private func database(session: String = "synthetic-session", extra: String = "") throws -> ClaudeDesktopCredentials {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent("desktop tests \(UUID())")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)

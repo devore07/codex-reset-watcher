@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.6.1
+
+- Show server-reported Fable weekly usage beside Claude's five-hour and overall
+  weekly limits, using the existing Desktop request and Keychain connection.
+- Keep Fable reset times independent; show missing/unreported values explicitly
+  and never infer an included allowance or paid credit balance from Pro status.
+- Keep the menu compact by placing Claude Details beside the receipt timestamp.
+- Add Fable decoding, invalid/duplicate/expired window, privacy, report-compatibility,
+  and three-meter/four-reset layout coverage.
+
 ## v0.6.0
 
 - Add optional Claude Desktop usage polling using the existing desktop login;

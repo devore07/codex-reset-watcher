@@ -54,8 +54,14 @@ final class ClaudeLayoutTests: XCTestCase {
             ]
         ]
         try manager.record(statusLine: JSONSerialization.data(withJSONObject: input), now: now)
+        let original = try manager.readReport(now: now)
+        let withFable = ClaudeUsageReport(
+            receivedAt: now, fiveHour: original.fiveHour, sevenDay: original.sevenDay,
+            fableWeekly: [ClaudeFableWindow(model: .fable, window: ClaudeUsageWindow(usedPercentage: 40, resetsAt: reset + 172_800))])
+        try JSONEncoder().encode(withFable).write(to: manager.reportURL, options: .atomic)
         let claude = ClaudeUsageStore(manager: manager)
         claude.reload(at: now)
+        XCTAssertEqual(claude.report?.fableWeekly.count, 1)
         for mode in CodexAppearanceMode.allCases {
             let view = MenuBarStatusView(
                 store: codex, claudeStore: claude, mainWindowController: MainWindowController(),
