@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.1 - 2026-09-06
+
+- Keeps the initial terminal status-line report in **Waiting for Claude Code**
+  until usage fields arrive. Malformed input still produces an unavailable state.
+- Adds a derived waiting flag to distinguish startup from a failed report,
+  with backward-compatible reading of existing reports.
+- Updates the release and source-build documentation for this fork.
+
 ## 0.5.0 - 2026-09-06
 
 - Adds optional Claude Pro/Max five-hour and weekly remaining usage to the menu

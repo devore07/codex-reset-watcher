@@ -40,6 +40,9 @@ def verify(helper):
             return subprocess.run(["/bin/sh", "-c", command], input=data, capture_output=True, timeout=10)
 
         save_state()
+        result = run(b"{}")
+        assert result.stdout == b"Waiting for Claude usage\n"
+        assert json.loads((directory / "usage.json").read_bytes())["waitingForUsage"] is True
         result = run()
         assert result.returncode == 0, result.stderr
         assert result.stdout == b"5h: 76% remaining | Week: 40% remaining\n"
