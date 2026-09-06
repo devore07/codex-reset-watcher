@@ -21,8 +21,10 @@ struct ClaudeUsageRows: View {
                 ForEach(report.fableWeekly) { fable in
                     windowRow("\(fable.model.rawValue) weekly", window: fable.window, symbol: "sparkles")
                 }
-                if store.desktopEnabled && report.fableWeekly.isEmpty {
-                    windowRow("Fable weekly", window: nil, symbol: "sparkles", missingLabel: "Not reported by Claude")
+                if report.fableWeekly.isEmpty {
+                    windowRow(
+                        "Fable weekly", window: nil, symbol: "sparkles",
+                        missingLabel: store.desktopEnabled ? "Not reported by Claude" : "Not supplied by CLI feed")
                 }
                 if let receipt = store.receiptLabel {
                     HStack {
@@ -98,6 +100,13 @@ struct ClaudeDetailView: View {
                 if store.desktopEnabled {
                     Text(
                         "Fable limits appear when Claude reports a separate weekly allowance. Pro may use paid usage credits instead; an unreported limit is not a zero balance. Paid credit balances are not shown here."
+                    )
+                    .font(CodexStyle.Typography.caption)
+                    .foregroundStyle(CodexPalette.secondaryText)
+                }
+                if !store.desktopEnabled && store.connected {
+                    Text(
+                        "The CLI status-line feed does not supply Fable usage. To check Fable, disconnect this feed and select Claude Desktop; you can continue using the CLI normally."
                     )
                     .font(CodexStyle.Typography.caption)
                     .foregroundStyle(CodexPalette.secondaryText)

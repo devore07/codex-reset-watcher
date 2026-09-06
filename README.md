@@ -95,7 +95,9 @@ says Pro uses paid usage credits for Fable, while Max and certain premium team
 seats include a separate weekly allowance. The watcher displays what the server
 reports and does not infer entitlement from a plan label. Paid credit balances
 are not included. The terminal status-line feed still supplies only its two
-documented overall windows; select Desktop for Fable checks.
+documented overall windows and labels Fable **Not supplied by CLI feed**; select
+Desktop for Fable checks. Using Desktop as the monitoring source does not stop
+you using Claude Code CLI for your work.
 
 ### Alternative: terminal status-line feed
 
