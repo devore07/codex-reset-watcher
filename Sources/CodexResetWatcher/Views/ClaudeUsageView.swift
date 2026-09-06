@@ -3,6 +3,7 @@ import SwiftUI
 
 struct ClaudeUsageRows: View {
     @ObservedObject var store: ClaudeUsageStore
+    var openDetails: (() -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: CodexStyle.Spacing.tight) {
@@ -17,10 +18,22 @@ struct ClaudeUsageRows: View {
             if let report = store.report {
                 windowRow("5-hour limit", window: report.fiveHour, symbol: "clock")
                 windowRow("Weekly limit", window: report.sevenDay, symbol: "calendar")
+                ForEach(report.fableWeekly) { fable in
+                    windowRow("\(fable.model.rawValue) weekly", window: fable.window, symbol: "sparkles")
+                }
+                if store.desktopEnabled && report.fableWeekly.isEmpty {
+                    windowRow("Fable weekly", window: nil, symbol: "sparkles", missingLabel: "Not reported by Claude")
+                }
                 if let receipt = store.receiptLabel {
-                    Text(receipt)
-                        .font(CodexStyle.Typography.menuRowMeta)
-                        .foregroundStyle(CodexPalette.secondaryText)
+                    HStack {
+                        Text(receipt)
+                            .font(CodexStyle.Typography.menuRowMeta)
+                            .foregroundStyle(CodexPalette.secondaryText)
+                        if let openDetails {
+                            Spacer()
+                            Button("Details", action: openDetails).font(CodexStyle.Typography.menuRowMeta)
+                        }
+                    }
                 }
             } else {
                 Text(
@@ -32,7 +45,7 @@ struct ClaudeUsageRows: View {
         }
     }
 
-    private func windowRow(_ title: String, window: ClaudeUsageWindow?, symbol: String) -> some View {
+    private func windowRow(_ title: String, window: ClaudeUsageWindow?, symbol: String, missingLabel: String? = nil) -> some View {
         let expired = window?.hasExpired(at: store.now) == true
         let remaining = expired ? nil : window?.remainingPercentage.map { Int($0.rounded(.down)) }
         let tone: CodexTone =
@@ -43,7 +56,7 @@ struct ClaudeUsageRows: View {
                 .frame(width: CodexStyle.Size.menuIconColumn)
             VStack(alignment: .leading, spacing: CodexStyle.Spacing.tight) {
                 Text(title).font(CodexStyle.Typography.menuRowTitle)
-                Text(expired ? "Awaiting updated usage" : resetLabel(window))
+                Text(expired ? "Awaiting updated usage" : (window == nil ? missingLabel : nil) ?? resetLabel(window))
                     .font(CodexStyle.Typography.menuRowMeta)
                     .foregroundStyle(CodexPalette.secondaryText)
                 LimitMeterView(
@@ -82,6 +95,13 @@ struct ClaudeDetailView: View {
                         : "These are observations from terminal Claude Code, not independent server checks. The Claude desktop Code tab does not supply this feed. Web or desktop usage appears only when a terminal session reports the shared subscription limits. Refresh rereads the local report."
                 )
                 .font(CodexStyle.Typography.body)
+                if store.desktopEnabled {
+                    Text(
+                        "Fable limits appear when Claude reports a separate weekly allowance. Pro may use paid usage credits instead; an unreported limit is not a zero balance. Paid credit balances are not shown here."
+                    )
+                    .font(CodexStyle.Typography.caption)
+                    .foregroundStyle(CodexPalette.secondaryText)
+                }
                 if let error = store.errorMessage { Text(error).foregroundStyle(CodexPalette.warningText) }
                 Divider()
                 connectionControls

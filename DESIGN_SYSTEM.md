@@ -63,6 +63,11 @@ the visual priority.
   explicitly. Desktop setup explains Keychain access and the internal endpoint;
   Refresh fetches server usage for Desktop and rereads observations for terminal.
   Source switching requires disconnecting first.
+- Fable weekly is a separate Claude meter sourced from an explicitly labeled
+  model-scoped server allowance. Never derive it from the overall weekly limit,
+  plan name, or paid credit balance. Keep missing and expired timing explicit.
+  Place the menu's Claude Details action beside receipt time to fit the third
+  usage row without shrinking row heights or introducing scrolling.
 - Cached snapshots and stale cleanup stay in the full desktop app, not the menu
   dropdown.
 - Preserve count honesty: when a server count is higher than decoded display
@@ -123,5 +128,5 @@ Then open the real macOS menu bar dropdown and check:
 - light and dark system appearances still have enough contrast
 - loading, partial endpoint failure, missing auth, blocked limits, and cached or
   stale snapshots remain understandable without relying on color alone
-- connected Claude with both windows plus four reset cards fits without clipping;
+- connected Claude with both overall windows, Fable, and four reset cards fits without clipping;
   also check partial, waiting, configuration-changed, and expired Claude states

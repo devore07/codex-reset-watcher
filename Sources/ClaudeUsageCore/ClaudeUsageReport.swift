@@ -28,22 +28,43 @@ public struct ClaudeUsageWindow: Codable, Equatable, Sendable {
     public func hasExpired(at now: Date) -> Bool { resetDate.map { $0 <= now } ?? false }
 }
 
+/// A derived model allowance; names are allowlisted rather than copying arbitrary server text.
+public struct ClaudeFableWindow: Codable, Equatable, Sendable, Identifiable {
+    public enum Model: String, Codable, CaseIterable, Sendable {
+        case fable = "Fable"
+        case five = "Fable 5"
+        case fiveOne = "Fable 5.1"
+    }
+    public let model: Model
+    public let window: ClaudeUsageWindow
+    public var id: String { model.rawValue }
+    public init(model: Model, window: ClaudeUsageWindow) {
+        self.model = model
+        self.window = window
+    }
+}
+
 public struct ClaudeUsageReport: Codable, Equatable, Sendable {
     public let version: Int
     public let receivedAt: TimeInterval
     public let fiveHour: ClaudeUsageWindow?
     public let sevenDay: ClaudeUsageWindow?
     public let waitingForUsage: Bool
+    public let fableWeekly: [ClaudeFableWindow]
 
-    public init(receivedAt: Date, fiveHour: ClaudeUsageWindow?, sevenDay: ClaudeUsageWindow?, waitingForUsage: Bool = false) {
+    public init(
+        receivedAt: Date, fiveHour: ClaudeUsageWindow?, sevenDay: ClaudeUsageWindow?, waitingForUsage: Bool = false,
+        fableWeekly: [ClaudeFableWindow] = []
+    ) {
         version = 1
         self.receivedAt = receivedAt.timeIntervalSince1970
         self.fiveHour = fiveHour
         self.sevenDay = sevenDay
         self.waitingForUsage = waitingForUsage
+        self.fableWeekly = fableWeekly
     }
 
-    private enum CodingKeys: String, CodingKey { case version, receivedAt, fiveHour, sevenDay, waitingForUsage }
+    private enum CodingKeys: String, CodingKey { case version, receivedAt, fiveHour, sevenDay, waitingForUsage, fableWeekly }
 
     public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
@@ -52,11 +73,16 @@ public struct ClaudeUsageReport: Codable, Equatable, Sendable {
         fiveHour = try? values.decode(ClaudeUsageWindow.self, forKey: .fiveHour)
         sevenDay = try? values.decode(ClaudeUsageWindow.self, forKey: .sevenDay)
         waitingForUsage = try values.decodeIfPresent(Bool.self, forKey: .waitingForUsage) ?? false
+        fableWeekly = (try? values.decode([ClaudeFableWindow].self, forKey: .fableWeekly)) ?? []
     }
 
     public var receiptDate: Date { Date(timeIntervalSince1970: receivedAt) }
-    public var hasUsage: Bool { fiveHour?.usedPercentage != nil || sevenDay?.usedPercentage != nil }
-    public var isPartial: Bool { fiveHour?.usedPercentage == nil || sevenDay?.usedPercentage == nil }
+    public var hasUsage: Bool {
+        fiveHour?.usedPercentage != nil || sevenDay?.usedPercentage != nil || fableWeekly.contains { $0.window.usedPercentage != nil }
+    }
+    public var isPartial: Bool {
+        fiveHour?.usedPercentage == nil || sevenDay?.usedPercentage == nil || fableWeekly.contains { $0.window.usedPercentage == nil }
+    }
     public func isOld(at now: Date) -> Bool { now.timeIntervalSince1970 >= receivedAt + 300 }
 
     public static func decode(_ data: Data, now: Date = Date()) throws -> Self {

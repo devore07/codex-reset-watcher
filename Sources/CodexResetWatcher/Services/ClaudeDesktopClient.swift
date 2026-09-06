@@ -74,22 +74,71 @@ struct ClaudeDesktopClient: Sendable {
                     resetsAt: date?.timeIntervalSince1970)
             }
         }
+        struct ScopedLimit: Decodable {
+            let fable: ClaudeFableWindow?
+            enum CodingKeys: String, CodingKey {
+                case kind, scope, percent
+                case resetsAt = "resets_at"
+            }
+            struct Scope: Decodable {
+                let model: Model?
+                struct Model: Decodable {
+                    let displayName: String?
+                    enum CodingKeys: String, CodingKey { case displayName = "display_name" }
+                }
+            }
+            init(from decoder: Decoder) throws {
+                guard let values = try? decoder.container(keyedBy: CodingKeys.self),
+                    (try? values.decode(String.self, forKey: .kind)) == "weekly_scoped",
+                    let scope = try? values.decode(Scope.self, forKey: .scope),
+                    let name = scope.model?.displayName,
+                    let model = ClaudeFableWindow.Model.allCases.first(where: { $0.rawValue.caseInsensitiveCompare(name) == .orderedSame })
+                else {
+                    fable = nil
+                    return
+                }
+                // Scoped percent is already 0...100, just like top-level utilization.
+                let reset = try? values.decode(String.self, forKey: .resetsAt)
+                let formatter = ISO8601DateFormatter()
+                formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+                var date = reset.flatMap(formatter.date(from:))
+                if date == nil {
+                    formatter.formatOptions = [.withInternetDateTime]
+                    date = reset.flatMap(formatter.date(from:))
+                }
+                fable = ClaudeFableWindow(
+                    model: model,
+                    window: ClaudeUsageWindow(
+                        usedPercentage: try? values.decode(Double.self, forKey: .percent), resetsAt: date?.timeIntervalSince1970))
+            }
+        }
         struct Envelope: Decodable {
             let five: Window?
             let seven: Window?
+            let fable: [ClaudeFableWindow]
             enum CodingKeys: String, CodingKey {
                 case five = "five_hour"
                 case seven = "seven_day"
+                case limits
             }
             init(from decoder: Decoder) throws {
                 let values = try decoder.container(keyedBy: CodingKeys.self)
                 five = try? values.decode(Window.self, forKey: .five)
                 seven = try? values.decode(Window.self, forKey: .seven)
+                let scoped = (try? values.decode([ScopedLimit].self, forKey: .limits))?.compactMap(\.fable) ?? []
+                // Conflicting duplicates are unavailable, never combined or selected by array order.
+                fable = ClaudeFableWindow.Model.allCases.compactMap { model in
+                    let matches = scoped.filter { $0.model == model }
+                    guard let first = matches.first else { return nil }
+                    return matches.allSatisfy { $0.window == first.window }
+                        ? first : ClaudeFableWindow(model: model, window: ClaudeUsageWindow(usedPercentage: nil, resetsAt: nil))
+                }
             }
         }
         do {
             let envelope = try JSONDecoder().decode(Envelope.self, from: data)
-            let report = ClaudeUsageReport(receivedAt: now, fiveHour: envelope.five?.value, sevenDay: envelope.seven?.value)
+            let report = ClaudeUsageReport(
+                receivedAt: now, fiveHour: envelope.five?.value, sevenDay: envelope.seven?.value, fableWeekly: envelope.fable)
             guard report.hasUsage else { throw ClaudeDesktopError.invalidResponse }
             return report
         } catch { throw ClaudeDesktopError.invalidResponse }

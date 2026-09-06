@@ -10,9 +10,9 @@ Codex usage limits and reset credits. Keep changes scoped to that product.
 - Public GitHub repo: `https://github.com/jordan-edai/codex-reset-watcher`
 - Canonical local path: `/Users/everydayai/Documents/!Codex Projects/Rate Refresher Project`
 - Compatibility path: `/Users/everydayai/Documents/Rate Refresher Project`
-- Release version: `v0.6.0`
+- Release version: `v0.6.1`
 - Check `git log --oneline --decorate -5` for the current `main` commit; this
-  note tracks the repo state through the `v0.6.0` Claude Desktop and terminal usage sources.
+  note tracks the repo state through the `v0.6.1` Claude Desktop Fable allowance display.
 - App bundle version is set in `script/build_and_run.sh`.
 
 ## Product Decisions
@@ -157,6 +157,10 @@ Codex usage limits and reset credits. Keep changes scoped to that product.
   encrypted domain binding and reject unsupported schemas. Credentials, raw
   responses, and Desktop reports stay in memory. Never print Keychain secrets
   or session cookies. Only explicit Connect/Reconnect may prompt for Keychain.
+- Fable usage comes only from explicitly labeled weekly_scoped entries in the
+  Desktop usage response. Never infer it from Pro status, overall weekly usage,
+  unlabeled overage fields, or paid credit balances. Missing Fable reset times
+  stay missing; the terminal feed does not gain undocumented fields.
 - Preserve five-minute polling, 15-minute HTTP 429 backoff, prior timestamps on
   network failure, and clearing old usage when the Desktop login changes.
 - Tests use synthetic cookie databases and injected network/Keychain behavior;

@@ -58,7 +58,7 @@ Checks run every five minutes and on **Refresh**, including when you use only
 Claude desktop or web. The desktop app must have an existing saved login; it
 need not supply terminal activity. HTTP 429 pauses all usage checks, including
 manual refresh, for 15 minutes. No messages are sent, no credits are redeemed,
-and no account settings are changed. API billing and model-specific allowances
+and no account settings are changed. API billing and other model-specific allowances
 are excluded. Only one currently selected Claude subscription is shown.
 
 Session cookies, Keychain secrets, organization identifiers, and raw responses
@@ -76,6 +76,26 @@ The implementation was validated on macOS with a real Desktop login on
 against the visible Claude Usage screen remains a manual verification step.
 Technical references: [Chromium cookie format](https://chromium.googlesource.com/chromium/src/net/+/master/extras/sqlite/sqlite_persistent_cookie_store.cc)
 and an [existing independent Desktop usage implementation](https://github.com/skibidiskib/claude-web-usage).
+
+### Fable weekly allowance
+
+The Desktop source also reads Fable entries from the existing usage response's
+`limits` array (`kind: weekly_scoped`, `scope.model.display_name`, `percent`, and
+`resets_at`). It shows a separate **Fable weekly** meter in the dropdown and
+Claude details. Percentages are already 0–100; remaining is 100 minus percent.
+Each reported Fable bucket keeps its own reset time. Missing timing stays
+unavailable, expired timing waits for an update, and conflicting duplicates
+stay unknown. A missing Fable bucket shows **Not reported by Claude**, never
+zero or 100%. Only allowlisted Fable names and derived usage/timing survive
+decoding; arbitrary model metadata is discarded. No extra network requests or
+Keychain prompts are added.
+
+As checked on 2026-09-06, [Anthropic's plan documentation](https://support.claude.com/en/articles/15424964-claude-fable-models-on-your-plan)
+says Pro uses paid usage credits for Fable, while Max and certain premium team
+seats include a separate weekly allowance. The watcher displays what the server
+reports and does not infer entitlement from a plan label. Paid credit balances
+are not included. The terminal status-line feed still supplies only its two
+documented overall windows; select Desktop for Fable checks.
 
 ### Alternative: terminal status-line feed
 

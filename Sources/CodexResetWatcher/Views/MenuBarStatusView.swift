@@ -117,12 +117,17 @@ struct MenuBarStatusView: View {
 
     private var claudeLimitsGroup: some View {
         VStack(alignment: .leading, spacing: CodexStyle.Spacing.tight) {
-            ClaudeUsageRows(store: claudeStore)
-            Button(claudeStore.connected ? "Claude details" : "Connect Claude") {
+            ClaudeUsageRows(store: claudeStore, openDetails: {
                 claudeStore.showingClaude = true
                 showMainWindow()
+            })
+            if claudeStore.report == nil {
+                Button(claudeStore.connected ? "Claude details" : "Connect Claude") {
+                    claudeStore.showingClaude = true
+                    showMainWindow()
+                }
+                .font(CodexStyle.Typography.menuRowMeta)
             }
-            .font(CodexStyle.Typography.menuRowMeta)
         }
     }
 
