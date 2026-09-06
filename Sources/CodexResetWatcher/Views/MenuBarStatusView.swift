@@ -5,6 +5,7 @@ struct MenuBarStatusView: View {
     private static let visibleResetCreditLimit = 4
 
     @ObservedObject var store: ResetCreditsStore
+    @ObservedObject var claudeStore: ClaudeUsageStore
     @ObservedObject var mainWindowController: MainWindowController
     @Binding var appearanceModeRawValue: String
     @Environment(\.openWindow) private var openWindow
@@ -31,7 +32,7 @@ struct MenuBarStatusView: View {
             footer
         }
         .padding(CodexStyle.Spacing.menuPadding)
-        .frame(width: CodexStyle.Size.menuWidth)
+        .frame(width: claudeStore.connected ? CodexStyle.Size.multiProviderMenuWidth : CodexStyle.Size.menuWidth)
         .background(CodexPalette.menuPopoverBackground)
     }
 
@@ -50,6 +51,7 @@ struct MenuBarStatusView: View {
 
             Divider()
 
+            Text("Codex reset advice").font(CodexStyle.Typography.menuRowMeta)
             nudgeRow
         }
     }
@@ -57,6 +59,7 @@ struct MenuBarStatusView: View {
     private var footer: some View {
         HStack {
             Button {
+                claudeStore.reload()
                 Task {
                     await store.refresh()
                 }
@@ -80,7 +83,27 @@ struct MenuBarStatusView: View {
 
     private var currentLimitsSection: some View {
         VStack(alignment: .leading, spacing: 7) {
-            menuSectionHeader(MenuBarSection.currentLimits.rawValue, detail: currentLimitsDetail)
+            menuSectionHeader(MenuBarSection.currentLimits.rawValue)
+            if claudeStore.connected {
+                HStack(alignment: .top, spacing: CodexStyle.Spacing.section) {
+                    codexLimitsGroup.frame(maxWidth: .infinity, alignment: .topLeading)
+                    claudeLimitsGroup.frame(maxWidth: .infinity, alignment: .topLeading)
+                }
+            } else {
+                codexLimitsGroup
+                claudeLimitsGroup
+            }
+        }
+    }
+
+    private var codexLimitsGroup: some View {
+        VStack(alignment: .leading, spacing: 7) {
+            HStack {
+                Text("Codex").font(CodexStyle.Typography.menuRowTitle)
+                Spacer()
+                Text(currentLimitsDetail).font(CodexStyle.Typography.menuRowMeta)
+                    .foregroundStyle(CodexPalette.secondaryText)
+            }
 
             if store.usageWindows.isEmpty {
                 emptyLimitsRow
@@ -89,6 +112,17 @@ struct MenuBarStatusView: View {
                     limitRow(window)
                 }
             }
+        }
+    }
+
+    private var claudeLimitsGroup: some View {
+        VStack(alignment: .leading, spacing: CodexStyle.Spacing.tight) {
+            ClaudeUsageRows(store: claudeStore)
+            Button(claudeStore.connected ? "Claude details" : "Connect Claude") {
+                claudeStore.showingClaude = true
+                showMainWindow()
+            }
+            .font(CodexStyle.Typography.menuRowMeta)
         }
     }
 
@@ -105,13 +139,13 @@ struct MenuBarStatusView: View {
                 .frame(width: CodexStyle.Size.menuArtworkWidth, height: CodexStyle.Size.menuArtworkHeight)
 
             VStack(alignment: .leading, spacing: 3) {
-                Text("Codex limits")
+                Text("Usage limits")
                     .font(CodexStyle.Typography.menuTitle)
                     .foregroundStyle(CodexPalette.primaryText)
                 Text(DateFormatting.checked(store.lastChecked))
                     .font(CodexStyle.Typography.menuRowMeta)
                     .foregroundStyle(CodexPalette.secondaryText)
-                Text("Active: \(store.accountDisplayLabel)")
+                Text("Codex: \(store.accountDisplayLabel)")
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(CodexPalette.secondaryText)
                     .lineLimit(1)
@@ -125,7 +159,7 @@ struct MenuBarStatusView: View {
                     .font(.system(size: 27, weight: .semibold))
                     .monospacedDigit()
                     .foregroundStyle(CodexPalette.primaryText)
-                Text(menuResetCountLabel)
+                Text("Codex · \(menuResetCountLabel)")
                     .font(CodexStyle.Typography.menuRowMeta)
                     .foregroundStyle(CodexPalette.secondaryText)
                     .lineLimit(1)
@@ -205,14 +239,16 @@ struct MenuBarStatusView: View {
 
     private var resetRows: some View {
         VStack(alignment: .leading, spacing: 7) {
-            menuSectionHeader(MenuBarSection.bankedResetsExpiration.rawValue, detail: resetCountDetail)
+            menuSectionHeader(MenuBarSection.bankedResetsExpiration.rawValue, detail: "Codex · \(resetCountDetail)")
 
-            ForEach(visibleResetCredits, id: \.element.id) { index, credit in
-                resetExpiryRow(index: index, credit: credit)
-            }
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: CodexStyle.Spacing.section), count: claudeStore.connected ? 2 : 1), spacing: 7) {
+                ForEach(visibleResetCredits, id: \.element.id) { index, credit in
+                    resetExpiryRow(index: index, credit: credit)
+                }
 
-            ForEach(0..<missingVisibleResetCreditCount, id: \.self) { offset in
-                missingResetExpiryRow(index: visibleResetCredits.count + offset)
+                ForEach(0..<missingVisibleResetCreditCount, id: \.self) { offset in
+                    missingResetExpiryRow(index: visibleResetCredits.count + offset)
+                }
             }
 
             if totalResetCreditCount > Self.visibleResetCreditLimit {

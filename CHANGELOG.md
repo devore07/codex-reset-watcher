@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.5.0 - 2026-09-06
+
+- Adds optional Claude Pro/Max five-hour and weekly remaining usage to the menu
+  and desktop sidebar through terminal Claude Code's local status-line feed.
+- Adds explicit connection/disconnection, existing-command forwarding, and
+  automatic discovery of standard CLI and Claude Desktop's native engine.
+- Labels observations with receipt times, preserves partial/unavailable states,
+  and stops showing expired windows as current capacity.
+- Uses a wider connected menu with provider columns and paired Codex reset cards.
+  The existing Codex menu-bar title and reset advice remain Codex-specific.
+- Packages a universal, credential-free helper with private atomic reports,
+  container tests, and command-forwarding/secret checks in CI.
+- Requires terminal Claude Code activity; desktop-only Code sessions do not
+  produce this feed. No Claude credentials, browser cookies, or account mutations
+  are involved.
+
 ## 0.4.4 - 2026-07-12
 
 - Restores the weekly reset weekday to the compact menu bar title, for example

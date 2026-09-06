@@ -26,6 +26,9 @@ jobs:
       - name: Package app bundle
         run: ./script/package.sh
 
+      - name: Verify Claude helper
+        run: bash script/verify_claude_package.sh
+
       - name: Verify app bundle
         run: |
           set -euo pipefail
@@ -48,7 +51,7 @@ jobs:
           STRINGS_OUTPUT="$(mktemp)"
           trap 'rm -f "$STRINGS_OUTPUT"' EXIT
           strings -a "$APP_BINARY" > "$STRINGS_OUTPUT"
-          if grep -En "$SECRET_PATTERN" "$STRINGS_OUTPUT"; then
+          if grep -Eq "$SECRET_PATTERN" "$STRINGS_OUTPUT"; then
             echo "Packaged executable contains a possible secret or raw private payload" >&2
             exit 1
           fi

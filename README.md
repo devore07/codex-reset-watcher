@@ -2,7 +2,7 @@
 
 <img src="Assets/AppIcon.png" width="128" alt="Codex Reset Watcher icon">
 
-Unofficial macOS utility for checking Codex rate-limit windows and banked reset credits.
+Unofficial macOS utility for checking Codex rate-limit windows and banked reset credits, with optional Claude Pro/Max usage from terminal Claude Code.
 
 It reads your existing local Codex Desktop login from `~/.codex/auth.json`, calls the same internal Codex Desktop endpoints used by the app, and shows:
 
@@ -34,6 +34,61 @@ Codex Reset Watcher is read-only. It does not redeem resets, reset usage, modify
 
 No API key is required.
 
+## Claude subscription usage
+
+The optional Claude integration shows five-hour and weekly remaining percentages,
+reset times, and when a local report was received. The menu-bar title continues
+to show Codex weekly capacity. Claude and Codex appear as separate groups in
+the dropdown; select **Claude subscription** in the desktop sidebar for setup.
+
+**Terminal Claude Code 2.1.251 or later is required. The Claude desktop Code tab
+does not supply this status-line feed.** You can use the terminal alongside
+desktop, signed into the same Pro/Max subscription. Desktop or web activity is
+reflected only when terminal Claude Code reports the shared subscription limits.
+This integration does not independently poll Anthropic, and does not infer
+remaining allowance from token counts or session cost.
+
+1. Open the desktop window and select **Claude subscription**.
+2. Check the configuration directory (normally `~/.claude`) and Claude Code
+   executable. The app detects standard CLI installations and compatible native
+   engines already downloaded by Claude Desktop. **Choose…** supports other paths.
+3. Click **Connect Claude**. This explicit action installs a helper in
+   `~/Library/Application Support/Codex Reset Watcher/Claude` and updates only the
+   selected `settings.json` status-line command. Existing commands keep their
+   original input/output; other settings and status-line options are preserved.
+4. Run that Claude Code executable in a terminal, sign in through Claude Code if
+   needed, and use a session. Usage fields normally arrive after the first API
+   response. The watcher never signs in, reads credentials, or sends a prompt.
+
+If the app stays at **Waiting for Claude Code**, verify the terminal session uses
+the selected configuration, the account is Pro/Max, and project-level settings
+do not override `statusLine`. A bundled desktop engine is usable as a terminal
+executable, but simply running the desktop Code tab does not activate this feed.
+See the [official status-line documentation](https://code.claude.com/docs/en/statusline).
+
+Reports are observations, not proof of a fresh server check. After five minutes,
+values are labeled **Last reported**. A passed reset time becomes **Awaiting
+updated usage**, never an assumed 100%. Missing windows stay unknown, and read
+failures retain an older valid report only with its original receipt time and
+an unavailable status. **Refresh** rereads the local report; it cannot request
+a new Claude server reading. Only one Claude subscription is supported; no
+account identity is inferred and no Claude account history is kept.
+
+**Disconnect Claude** restores the previous command if the watcher still owns
+the setting, preserving later edits to unrelated options. A replacement command
+is never overwritten. The usage report is removed. An inert helper and minimal
+command recovery metadata remain so already-running sessions can continue
+forwarding to the previous command; the watcher does not read login information. To remove
+these files entirely, first close terminal sessions and remove any project-level
+references to the helper, then delete the dedicated Claude support directory.
+After an app upgrade, disconnect and reconnect to install its updated helper.
+
+Only percentages, reset times, a receipt timestamp, and a schema version are
+stored in `usage.json`, with private permissions and serialized atomic writes.
+Raw status-line input, transcripts, tokens, cookies, account IDs, and API keys
+are not stored. The app makes no Claude network requests. Existing status-line
+commands continue to run under the user's original configuration.
+
 ## Install
 
 1. Download the versioned zip asset from the latest GitHub release, for example
@@ -54,6 +109,32 @@ open "dist/Codex Reset Watcher.app"
 ```
 
 The script uses SwiftPM and writes SwiftPM scratch files under `/tmp/codex-reset-watcher-build` to avoid file-provider issues in synced folders.
+
+### Verification
+
+The portable helper and connection tests run in a tagged container:
+
+```bash
+docker build -t codex-reset-watcher:claude-tests .
+docker run --rm codex-reset-watcher:claude-tests
+```
+
+The SwiftUI app requires the native macOS SDK. No additional host packages are
+needed for these checks:
+
+```bash
+swift test --scratch-path /tmp/codex-reset-watcher-test --jobs 1
+CONFIGURATION=release ./script/package.sh
+bash script/verify_claude_package.sh
+CONFIGURATION=release ./script/build_and_run.sh --verify
+```
+
+The packaged helper check uses synthetic input and isolated temporary settings.
+It covers command forwarding, exit codes, permissions, concurrent invocations,
+privacy, and disconnect behavior. Native tests also cover stale/partial reports,
+directory observation, provider independence, and menu sizing in all appearances.
+Real-account validation still requires a signed-in terminal Claude Code session
+and a comparison with its usage display.
 
 ## Nudge Logic
 

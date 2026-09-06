@@ -2,13 +2,25 @@ import SwiftUI
 
 struct AccountSidebarView: View {
     @ObservedObject var store: ResetCreditsStore
+    @ObservedObject var claudeStore: ClaudeUsageStore
 
-    private var selection: Binding<AccountSelection?> {
+    private enum Selection: Hashable {
+        case codex(AccountSelection)
+        case claude
+    }
+
+    private var selection: Binding<Selection?> {
         Binding {
-            store.selectedAccount
+            claudeStore.showingClaude ? .claude : .codex(store.selectedAccount)
         } set: { newValue in
-            if let newValue {
-                store.select(newValue)
+            switch newValue {
+            case .claude:
+                claudeStore.showingClaude = true
+            case let .codex(account):
+                claudeStore.showingClaude = false
+                store.select(account)
+            case nil:
+                break
             }
         }
     }
@@ -17,9 +29,9 @@ struct AccountSidebarView: View {
         VStack(spacing: 0) {
             List(selection: selection) {
                 if let active = store.sidebarRows.first {
-                    Section("Active account") {
+                    Section("Codex · Active account") {
                         sidebarRow(active)
-                            .tag(active.selection)
+                            .tag(Selection.codex(active.selection))
                     }
                 }
 
@@ -28,9 +40,14 @@ struct AccountSidebarView: View {
                     Section("Cached snapshots") {
                         ForEach(Array(cached)) { row in
                             sidebarRow(row)
-                                .tag(row.selection)
+                                .tag(Selection.codex(row.selection))
                         }
                     }
+                }
+                Section("Claude") {
+                    Label("Claude subscription", systemImage: "chart.bar")
+                        .font(CodexStyle.Typography.sidebarTitle)
+                        .tag(Selection.claude)
                 }
             }
             .listStyle(.sidebar)
