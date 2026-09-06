@@ -20,3 +20,12 @@ if grep -Eq "$SECRET_PATTERN" "$STRINGS_OUTPUT"; then
   exit 1
 fi
 python3 script/verify_claude_bridge.py "$HELPER"
+
+# The app now also reads Desktop credentials; inspect it without printing matches.
+APP_BINARY="$APP_BUNDLE/Contents/MacOS/CodexResetWatcher"
+strings -a "$APP_BINARY" > "$STRINGS_OUTPUT"
+DESKTOP_SECRET_PATTERN='(sk-ant-[[:alnum:]_-]{12,})|(sessionKey=[[:alnum:]_-]{12,})|(\{"five_hour"[[:space:]]*:)|(/Users/[^[:space:]]+/Library/Application Support/Claude/Cookies)'
+if grep -Eq "$DESKTOP_SECRET_PATTERN" "$STRINGS_OUTPUT"; then
+  echo "App contains a possible Claude credential or raw payload; inspect locally without publishing matches." >&2
+  exit 1
+fi

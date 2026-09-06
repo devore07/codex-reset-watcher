@@ -24,6 +24,7 @@ struct ContentView: View {
                         onRefresh: {
                             claudeStore.reload()
                             Task {
+                                claudeStore.requestRefresh()
                                 await store.refresh()
                             }
                         },

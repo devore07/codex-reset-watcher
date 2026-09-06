@@ -59,7 +59,7 @@ struct MenuBarStatusView: View {
     private var footer: some View {
         HStack {
             Button {
-                claudeStore.reload()
+                claudeStore.requestRefresh()
                 Task {
                     await store.refresh()
                 }

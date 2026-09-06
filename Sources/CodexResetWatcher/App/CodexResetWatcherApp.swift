@@ -47,7 +47,7 @@ struct CodexResetWatcherApp: App {
             CommandGroup(replacing: .newItem) {}
             CommandMenu("Codex Reset Watcher") {
                 Button("Refresh") {
-                    claudeStore.reload()
+                    claudeStore.requestRefresh()
                     Task {
                         await store.refresh()
                     }
