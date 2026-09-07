@@ -66,3 +66,10 @@ The checked-in `Assets/AppIcon.icns` is used by normal builds. To regenerate the
 python3 -m pip install pillow
 ./script/make_icon.py
 ```
+
+## Before pushing
+
+Run `./script/check_secrets.sh` with Docker running. See [SECURITY.md](SECURITY.md)
+for installing the local pre-push guard and the scope of the public-repository
+audit. Never include real login data, usage reports, or account screenshots in
+commits or public review comments.

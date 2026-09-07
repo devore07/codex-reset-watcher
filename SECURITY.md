@@ -10,7 +10,37 @@ Please open a private GitHub security advisory if available, or contact the repo
 
 Do not paste Codex auth tokens, `~/.codex/auth.json`, screenshots containing secrets, or bearer tokens into public issues.
 
-## Security Notes
+## Public Repository Checks
+
+Run `./script/check_secrets.sh` before pushing. It scans all reachable Git history
+with official Gitleaks v8.30.1, pinned by container digest, using Docker. The
+scanner has no network access during the scan, mounts the repository read-only,
+and fully redacts findings. No test directories or credential rules are excluded.
+CI also runs this scan with complete history on pull requests, main pushes, and
+release tags; builds and release uploads depend on a successful scan.
+
+Install the local push guard once per clone, after checking that the destination
+does not contain a custom hook you need to preserve:
+
+```bash
+cp .githooks/pre-push "$(git rev-parse --git-path hooks/pre-push)"
+```
+
+The hook blocks a push when a finding occurs or the scanner cannot run. Docker
+must be available. Git hooks can be bypassed, so keep CI and review in place too.
+The existing release checks separately inspect app/helper strings and ensure the
+Claude helper persists only derived reports, never raw input or credentials.
+
+On 2026-09-07, a read-only audit of the public fork found no credentials in
+41 commits across its advertised refs or six published release archives through
+v0.7.2. Supplementary checks covered session-cookie/token patterns, account IDs,
+email-like strings, sensitive filenames, and public PR/release metadata. Matches
+were synthetic fixtures, upstream author/path metadata, and public image-signing
+certificate contacts. This is a bounded audit result, not a guarantee that a
+scanner can recognize every possible secret. Do not commit real usage screenshots,
+auth/cookie files, diagnostic output, or private account reports.
+
+## Runtime Handling
 
 Codex Reset Watcher:
 

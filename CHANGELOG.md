@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Add a fully redacted, digest-pinned secret scan to CI and an installable local
+  pre-push guard; document the public-history and release-archive audit.
+
 ## v0.7.2
 
 - Alternate Codex and connected Claude weekly usage in the menu bar every 10

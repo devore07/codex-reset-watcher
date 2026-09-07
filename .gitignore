@@ -6,6 +6,17 @@
 *.xcuserdata
 *.swp
 
+# Private local configuration and diagnostic captures.
+.env
+.env.*
+!.env.example
+/auth.json
+/Cookies
+/Cookies-wal
+/Cookies-shm
+/account-snapshots.json
+/*.log
+
 # Local Codex thread repair/recovery artifacts.
 codex-thread-folder-repair/
 codex-thread-recovery-*
