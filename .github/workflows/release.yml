@@ -6,8 +6,22 @@ on:
       - "v*"
 
 jobs:
+  secrets:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout complete history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Scan repository history
+        run: ./script/check_secrets.sh
+
   package:
     name: Package app
+    needs: secrets
     runs-on: macos-15
     permissions:
       contents: write
