@@ -76,6 +76,12 @@ the visual priority.
 - Preserve state honesty: loading, partial, signed-out, failed, and cached
   records need distinct copy and tone. Do not render an unknown count as `0` or
   a cached number as a current live limit.
+- The active-account desktop Dashboard shows equal-width Codex and Claude
+  columns in one shared scroll area. Codex loading/errors must not hide Claude.
+  Keep reset credits/advice under Codex and label Claude’s source and receipt
+  time. One footer refreshes both sources and controls appearance. Claude
+  connection settings and cached Codex snapshots remain sidebar destinations.
+  The desktop minimum width is 1180 points; default width is 1240 points.
 - Keep the desktop multi-account sidebar native and lightweight: one icon, one
   account label line, and one cached/active/stale detail line. Put dense metrics
   in the detail pane, not the sidebar.

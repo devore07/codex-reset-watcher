@@ -6,6 +6,8 @@ Unofficial macOS utility for checking Codex rate-limit windows and banked reset 
 
 It reads your existing local Codex Desktop login from `~/.codex/auth.json`, calls the same internal Codex Desktop endpoints used by the app, and shows:
 
+- a desktop **Dashboard** with Codex usage and reset credits on the left and
+  Claude usage on the right, with shared Refresh and appearance controls
 - current weekly usage remaining
 - usage bars that turn green, amber, or red based on remaining capacity
 - weekly menu bar status with remaining capacity and reset weekday, for example
