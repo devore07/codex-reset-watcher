@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.7.1
+
+- Alternate Codex and connected Claude weekly usage in the menu bar every 10
+  seconds, with a service symbol, name, remaining percentage and reset weekday.
+- Mark old/failed Claude readings and withhold expired allowances until updated;
+  hover for exact reset and receipt times. Disconnected Claude leaves Codex visible.
+- Keep rotation independent of the existing usage refresh schedules.
+
 ## v0.7.0
 
 - Add a unified desktop Dashboard with Codex on the left and Claude on the right.

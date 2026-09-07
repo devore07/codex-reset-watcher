@@ -77,15 +77,7 @@ struct CodexResetWatcherApp: App {
                     claudeStore.reload()
                 }
         } label: {
-            HStack(spacing: 4) {
-                Image(systemName: store.statusSymbolName)
-                Text(store.menuBarTitle)
-                    .monospacedDigit()
-            }
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel("Codex Reset Watcher")
-            .accessibilityValue(store.menuBarTitle)
-            .help("Codex Reset Watcher: \(store.menuBarTitle)")
+            WeeklyMenuBarLabel(store: store, claudeStore: claudeStore)
         }
         .menuBarExtraStyle(.window)
     }

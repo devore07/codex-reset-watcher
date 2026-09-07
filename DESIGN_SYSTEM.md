@@ -85,10 +85,11 @@ the visual priority.
 - Keep the desktop multi-account sidebar native and lightweight: one icon, one
   account label line, and one cached/active/stale detail line. Put dense metrics
   in the detail pane, not the sidebar.
-- Keep the current menu bar title compact and weekly: percentage plus reset
-  weekday, for example `57% | Sunday`. There is temporarily no metric selector.
-  Missing timing uses `week`, and missing weekly data uses `--% | week`. Never
-  substitute reset counts, account labels, or status copy.
+- Keep the menu bar weekly, alternating Codex and connected Claude every 10
+  seconds. Use a terminal/asterisk symbol and service name with the percentage
+  and reset weekday. Missing timing uses `week`; missing weekly data uses `--%`.
+  Claude old/failed readings carry `*` with an explanatory tooltip; passed resets
+  show `--% | updating`. Keep reset counts and account labels out of the title.
 - Preserve the former 5-hour design in `MENU_BAR_DISPLAY_PLAN.md`; restore its
   selector and time cue only after the endpoint reliably returns that window.
 - Menu rows should fit without horizontal clipping. If text gets tight, shorten

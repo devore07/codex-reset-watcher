@@ -1,11 +1,18 @@
 # Menu Bar Display Plan
 
-## Current Weekly-Only Phase
+## Current Weekly Provider Rotation
 
 Codex currently returns the weekly usage window but not the former 5-hour
 window. Until that changes:
 
-- The menu bar title is always weekly: `57% | Sunday`.
+- The menu bar alternates Codex and connected Claude every 10 seconds, starting
+  with Codex. It stays on Codex when Claude is disconnected.
+- Use a terminal symbol for Codex and an asterisk symbol for Claude, plus the
+  service name: `Codex 57% | Sunday`, `Claude 80% | Monday`.
+- Claude uses only its overall weekly window. Old/failed observations append `*`
+  to the percentage; the tooltip explains that marker and gives exact reset and
+  receipt times. Passed resets show `Claude --% | updating`.
+- Rotation is presentation only; it never triggers network refreshes.
 - If the reset weekday is unavailable, use `57% | week`.
 - If weekly usage is unavailable, use `--% | week`.
 - Banked reset counts never replace the usage title.
