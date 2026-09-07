@@ -2,11 +2,12 @@
 
 ## v0.8.0
 
-- Add a saved Compact / Detailed dashboard control that resizes the same window.
-- Compact shows only provider remaining-usage meters and banked Codex reset counts
-  and expiration dates, with shared Refresh and appearance controls.
-- Preserve missing, blocked, old and expired readings; use Detailed for usage
-  timing, connection settings, advice and cached snapshots.
+- Add a saved Compact / Detailed switch to the dropdown opened from the menu bar.
+- Compact defaults to a 600-point popover with remaining usage, banked Codex reset
+  counts and expiration dates; Detailed expands to larger rows, timing and advice.
+- Both layouts hug their contents without scrolling or blank viewport space.
+  Preserve missing, blocked, old and expired readings and shared appearance.
+- Keep the desktop dashboard layout unchanged.
 
 ## v0.7.3
 

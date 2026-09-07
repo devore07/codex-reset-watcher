@@ -12,7 +12,7 @@ Codex usage limits and reset credits. Keep changes scoped to that product.
 - Compatibility path: `/Users/everydayai/Documents/Rate Refresher Project`
 - Release version: `v0.8.0`
 - Check `git log --oneline --decorate -5` for the current `main` commit; this
-  note tracks the repo state through the `v0.8.0` compact and detailed dashboard.
+  note tracks the repo state through the `v0.8.0` compact and detailed menu dropdown.
 - App bundle version is set in `script/build_and_run.sh`.
 
 ## Product Decisions
@@ -101,11 +101,11 @@ Codex usage limits and reset credits. Keep changes scoped to that product.
 - Menu cached-snapshot rows should focus the existing main window and update the
   shared account selection. Do not call `openWindow(id: "main")` directly from
   those rows, because `WindowGroup` can create duplicate main windows.
-- Desktop offers a persisted Compact / Detailed control. Compact uses a 600×510
-  content area without a sidebar, showing remaining usage and banked Codex reset
-  counts/expirations only; preserve unknown, blocked, old and expired states.
-  Switch sizes on the existing window. Cached snapshots and Claude connection
-  navigation expand to Detailed. Keep the menu dropdown independent.
+- The menu-bar dropdown offers a saved Compact / Detailed switch at the top.
+  Compact is the default 600-point popover with remaining usage and banked Codex
+  reset counts/expirations only; preserve unknown, blocked, old and expired states.
+  Show at most four reset dates and an explicit action for more. Both layouts hug
+  intrinsic content height without ScrollView. The desktop keeps its full layout.
 - The active desktop Dashboard shows Codex and Claude side by side; keep provider
   errors/loading independent and reset credits/advice under Codex. Cached snapshots
   remain separate from the live dashboard. Keep one shared Refresh and appearance

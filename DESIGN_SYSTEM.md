@@ -47,6 +47,13 @@ the visual priority.
 - The menu dropdown may be tall enough to breathe. Do not compress every row to
   keep all possible content above the fold; if the real popover feels jammed,
   prefer a wider menu and comfortable row heights before shrinking type.
+- The menu-bar dropdown has a saved Compact / Detailed selector at its top.
+  Compact is the default, 600 points wide, with only remaining provider usage,
+  banked Codex reset counts and up to four expiry dates. Further dates use an
+  explicit Open action. Keep old, unavailable, missing and expired states visible.
+  Its footer retains appearance, Refresh, Open and Quit. Detailed uses the existing
+  provider rows, usage reset timing, account overview and advice at the wider size.
+  Changing this selector must not resize or change the desktop window.
 - The menu dropdown must hug its intrinsic content height. Never add a
   screen-sized frame, forced viewport, `ScrollView`, or `ViewThatFits` layer
   that creates empty space above or below its visible rows.
@@ -81,19 +88,7 @@ the visual priority.
   Keep reset credits/advice under Codex and label Claude’s source and receipt
   time. One footer refreshes both sources and controls appearance. Claude
   connection settings and cached Codex snapshots remain sidebar destinations.
-  Detailed minimum content size is 1180 × 724 points; default is 1240 × 730.
-- A persistent Compact / Detailed control stays above both desktop layouts.
-  Switching presets resizes the same window, preserving normal macOS chrome.
-  Compact uses a 600 × 510 point content area with no sidebar or header artwork:
-  two provider cards with remaining percentages and shared meters, followed by
-  one Codex banked-reset count/expiry list. No used percentages, usage-reset
-  timing, account identity, setup prose or advice appear in Compact.
-  Keep blocked, unavailable, old and passed-reset status explicit. Only display
-  Fable when reported; Detailed explains source limitations. Four ordinary reset
-  rows fit at the default size; unusually many rows can scroll within the desktop
-  content, while size/appearance/refresh controls stay visible.
-  Compact always uses the active Codex account. Opening connection settings or
-  a cached snapshot selects Detailed. Keep the menu dropdown unchanged.
+  The desktop minimum width is 1180 points; default width is 1240 points.
 - Keep the desktop multi-account sidebar native and lightweight: one icon, one
   account label line, and one cached/active/stale detail line. Put dense metrics
   in the detail pane, not the sidebar.

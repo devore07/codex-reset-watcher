@@ -63,29 +63,25 @@ final class ClaudeLayoutTests: XCTestCase {
         claude.reload(at: now)
         XCTAssertEqual(claude.report?.fableWeekly.count, 1)
         for mode in CodexAppearanceMode.allCases {
-            let compact = CompactDashboardView(
-                detail: codex.detail(for: .active), claudeStore: claude,
-                appearanceModeRawValue: .constant(mode.rawValue), onRefresh: {}
-            )
-            .summary
-            .frame(width: CodexStyle.Size.compactWindowWidth - 2 * CodexStyle.Spacing.desktopPage)
-            .preferredColorScheme(mode.colorScheme)
+            let compact = MenuBarStatusView(
+                store: codex, claudeStore: claude, mainWindowController: MainWindowController(),
+                appearanceModeRawValue: .constant(mode.rawValue), menuViewModeRawValue: .constant("compact")
+            ).preferredColorScheme(mode.colorScheme)
             let compactSize = NSHostingView(rootView: compact).fittingSize
-            XCTAssertEqual(compactSize.width, 568, accuracy: 1)
-            // Header, footer and page insets use at most 115pt. Four resets and all usage fit without scrolling.
-            XCTAssertLessThanOrEqual(compactSize.height, CodexStyle.Size.compactWindowHeight - 115)
+            XCTAssertEqual(compactSize.width, CodexStyle.Size.compactMenuWidth, accuracy: 1)
+            XCTAssertLessThanOrEqual(compactSize.height, 500, "Compact menu must hug its content")
             if let output = ProcessInfo.processInfo.environment["CODEX_UI_TEST_OUTPUT"] {
-                let renderer = ImageRenderer(content: compact.padding(16).background(CodexPalette.appBackground))
+                let renderer = ImageRenderer(content: compact)
                 renderer.scale = 2
                 if let image = renderer.nsImage, let tiff = image.tiffRepresentation,
                     let data = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:])
                 {
-                    try data.write(to: URL(fileURLWithPath: output).appendingPathComponent("compact-\(mode.rawValue).png"))
+                    try data.write(to: URL(fileURLWithPath: output).appendingPathComponent("compact-menu-\(mode.rawValue).png"))
                 }
             }
             let view = MenuBarStatusView(
                 store: codex, claudeStore: claude, mainWindowController: MainWindowController(),
-                appearanceModeRawValue: .constant(mode.rawValue)
+                appearanceModeRawValue: .constant(mode.rawValue), menuViewModeRawValue: .constant("detailed")
             )
             .preferredColorScheme(mode.colorScheme)
             let hosting = NSHostingView(rootView: view)

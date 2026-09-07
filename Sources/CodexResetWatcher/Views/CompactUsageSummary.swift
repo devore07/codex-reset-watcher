@@ -1,39 +1,13 @@
 import ClaudeUsageCore
 import SwiftUI
 
-/// Only live remaining capacity and Codex reset expirations; setup stays in Detailed.
-struct CompactDashboardView: View {
+/// Intrinsically sized menu content: remaining capacity and Codex reset expirations.
+struct CompactUsageSummary: View {
     let detail: AccountDetailState
     @ObservedObject var claudeStore: ClaudeUsageStore
-    @Binding var appearanceModeRawValue: String
-    let onRefresh: () -> Void
+    var onShowAllResets: () -> Void = {}
 
     var body: some View {
-        VStack(spacing: CodexStyle.Spacing.desktopStack) {
-            ScrollView {
-                summary
-                    .padding(.vertical, 2)
-            }
-            HStack {
-                CodexSegmentedPicker("Appearance", selection: $appearanceModeRawValue) {
-                    ForEach(CodexAppearanceMode.allCases) { mode in
-                        Text(mode.title).tag(mode.rawValue)
-                    }
-                }
-                .frame(width: 170)
-                Spacer()
-                Button(action: onRefresh) {
-                    Label(detail.isRefreshing ? "Refreshing" : "Refresh", systemImage: "arrow.clockwise")
-                }
-                .disabled(detail.isRefreshing)
-            }
-            .controlSize(.small)
-        }
-        .padding(CodexStyle.Spacing.desktopPage)
-    }
-
-    // Separate intrinsic content lets layout verification exercise all rows without a viewport.
-    var summary: some View {
         VStack(alignment: .leading, spacing: CodexStyle.Spacing.stack) {
             HStack(alignment: .top, spacing: CodexStyle.Spacing.stack) {
                 provider("Codex", image: ProviderMark.codex) {
@@ -66,7 +40,9 @@ struct CompactDashboardView: View {
                             Text("Last reported · \(DateFormatting.timeOnly(report.receiptDate))")
                                 .font(CodexStyle.Typography.caption)
                                 .foregroundStyle(CodexPalette.secondaryText)
-                                .help(claudeStore.errorMessage ?? claudeStore.statusTitle)
+                                .help(
+                                    [claudeStore.receiptLabel, claudeStore.errorMessage, claudeStore.statusTitle].compactMap { $0 }.joined(
+                                        separator: "\n"))
                         }
                     } else {
                         Text(claudeStore.statusTitle)
@@ -113,11 +89,15 @@ struct CompactDashboardView: View {
                 Text(resetCountLabel).font(CodexStyle.Typography.caption)
                     .foregroundStyle(CodexPalette.secondaryText)
             }
-            ForEach(Array(detail.credits.enumerated()), id: \.element.id) { index, credit in
+            ForEach(Array(detail.credits.prefix(4).enumerated()), id: \.element.id) { index, credit in
                 expiryRow(index + 1, date: credit.expiresAt)
             }
-            ForEach(0..<max(0, (detail.resetCountState.count ?? 0) - detail.credits.count), id: \.self) { offset in
+            ForEach(0..<max(0, min(4, detail.resetCountState.count ?? 0) - detail.credits.prefix(4).count), id: \.self) { offset in
                 expiryRow(detail.credits.count + offset + 1, date: nil)
+            }
+            if max(detail.credits.count, detail.resetCountState.count ?? 0) > 4 {
+                Button("Show all reset expirations", action: onShowAllResets)
+                    .font(CodexStyle.Typography.caption)
             }
         }
         .padding(CodexStyle.Spacing.compactPanel)
