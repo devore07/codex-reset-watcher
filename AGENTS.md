@@ -10,9 +10,9 @@ Codex usage limits and reset credits. Keep changes scoped to that product.
 - Public GitHub repo: `https://github.com/jordan-edai/codex-reset-watcher`
 - Canonical local path: `/Users/everydayai/Documents/!Codex Projects/Rate Refresher Project`
 - Compatibility path: `/Users/everydayai/Documents/Rate Refresher Project`
-- Release version: `v0.7.0`
+- Release version: `v0.7.1`
 - Check `git log --oneline --decorate -5` for the current `main` commit; this
-  note tracks the repo state through the `v0.7.0` unified usage dashboard.
+  note tracks the repo state through the `v0.7.1` rotating weekly menu-bar display.
 - App bundle version is set in `script/build_and_run.sh`.
 
 ## Product Decisions
@@ -27,9 +27,11 @@ Codex usage limits and reset credits. Keep changes scoped to that product.
   - `https://chatgpt.com/backend-api/wham/rate-limit-reset-credits`
 - These endpoints can change without notice. Keep decoding tolerant and failure
   handling partial-data-friendly.
-- The menu bar title currently shows weekly remaining capacity and the weekly
-  reset weekday, for example `57% | Sunday`, with the status icon beside it.
-  Never replace it with a banked-reset count, account label, or status sentence.
+- The menu bar alternates Codex and connected Claude weekly usage every 10 seconds,
+  using terminal/asterisk symbols, service names, percentages and reset weekdays.
+  Stay on Codex when Claude is disconnected. Keep rotation independent of refresh.
+  Claude old/failed readings append `*`; passed resets show `--% | updating`.
+  Never substitute banked reset counts, account labels, five-hour or Fable data.
 - There is temporarily no menu-title metric selector while Codex does not return
   the former 5-hour window. If weekly reset timing is missing, use `week`; if
   weekly data is unavailable, show `--% | week`. Do not use 5-hour,

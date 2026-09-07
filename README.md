@@ -10,8 +10,12 @@ It reads your existing local Codex Desktop login from `~/.codex/auth.json`, call
   Claude usage on the right, with shared Refresh and appearance controls
 - current weekly usage remaining
 - usage bars that turn green, amber, or red based on remaining capacity
-- weekly menu bar status with remaining capacity and reset weekday, for example
-  `57% | Sunday`
+- weekly menu bar status alternating every 10 seconds between Codex and connected
+  Claude, with a terminal/asterisk service symbol, service name, remaining capacity
+  and reset weekday (for example `Codex 57% | Sunday` or `Claude 80% | Monday`)
+- an asterisk after Claude’s percentage marks an old or failed reading; hover for
+  the exact reset and receipt time. Passed resets show `--% | updating`.
+  Without a Claude connection, the menu bar stays on Codex.
 - a natural-height menu dropdown with no forced full-screen viewport
 - Light, Dark, and Auto appearance modes shared by the menu dropdown and main
   window
