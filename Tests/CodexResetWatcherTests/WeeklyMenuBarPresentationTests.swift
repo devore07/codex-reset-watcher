@@ -43,7 +43,8 @@ final class WeeklyMenuBarPresentationTests: XCTestCase {
 
     @MainActor
     func testPassedResetHidesRemainingPercentage() {
-        let now = Date()
+        // Fractional reference time loses precision when round-tripped through Unix time.
+        let now = Date(timeIntervalSinceReferenceDate: 810_000_000.000_000_3)
         let report = ClaudeUsageReport(
             receivedAt: now, fiveHour: nil,
             sevenDay: ClaudeUsageWindow(usedPercentage: 0, resetsAt: now.timeIntervalSince1970))

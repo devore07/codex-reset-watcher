@@ -6,6 +6,14 @@ import XCTest
 final class ClaudeUsageTests: XCTestCase {
     let now = Date(timeIntervalSince1970: 1_800_000_000)
 
+    func testExpiryAtFractionalUnixBoundary() {
+        let boundary = Date(timeIntervalSinceReferenceDate: 810_000_000.000_000_3)
+        let window = ClaudeUsageWindow(usedPercentage: 20, resetsAt: boundary.timeIntervalSince1970)
+        XCTAssertFalse(window.hasExpired(at: boundary.addingTimeInterval(-1)))
+        XCTAssertTrue(window.hasExpired(at: boundary))
+        XCTAssertTrue(window.hasExpired(at: boundary.addingTimeInterval(1)))
+    }
+
     func testFableDerivedRoundTripAndLegacyReports() throws {
         let legacy = try ClaudeUsageReport.decode(
             Data(#"{"version":1,"receivedAt":1800000000,"fiveHour":{"usedPercentage":50}}"#.utf8), now: now)
