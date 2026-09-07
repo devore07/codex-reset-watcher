@@ -11,7 +11,7 @@ It reads your existing local Codex Desktop login from `~/.codex/auth.json`, call
 - current weekly usage remaining
 - usage bars that turn green, amber, or red based on remaining capacity
 - weekly menu bar status alternating every 10 seconds between Codex and connected
-  Claude, with a terminal/asterisk service symbol, service name, remaining capacity
+  Claude, with a OpenAI knot/Claude starburst service symbol, service name, remaining capacity
   and reset weekday (for example `Codex 57% | Sunday` or `Claude 80% | Monday`)
 - an asterisk after Claude’s percentage marks an old or failed reading; hover for
   the exact reset and receipt time. Passed resets show `--% | updating`.

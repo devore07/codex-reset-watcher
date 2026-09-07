@@ -5,7 +5,7 @@ MODE="${1:-run}"
 PRODUCT_NAME="CodexResetWatcher"
 APP_NAME="Codex Reset Watcher"
 BUNDLE_ID="com.jordanedai.codex-reset-watcher"
-VERSION="0.7.2"
+VERSION="0.7.3"
 BUILD_NUMBER="1"
 MIN_SYSTEM_VERSION="14.0"
 CONFIGURATION="${CONFIGURATION:-debug}"
@@ -79,6 +79,11 @@ fi
 if [[ -f "$HEADER_ARTWORK" ]]; then
   cp "$HEADER_ARTWORK" "$APP_RESOURCES/UsageHeader.png"
 fi
+for PROVIDER_MARK in OpenAI Claude; do
+  cp "$ROOT_DIR/Assets/ProviderMarks/$PROVIDER_MARK.pdf" "$APP_RESOURCES/$PROVIDER_MARK.pdf"
+done
+cp "$ROOT_DIR/Assets/ProviderMarks/LICENSE-LobeHub" "$APP_RESOURCES/ProviderMarks-LICENSE.txt"
+cp "$ROOT_DIR/Assets/ProviderMarks/README.md" "$APP_RESOURCES/ProviderMarks-Attribution.md"
 
 /usr/bin/plutil -create xml1 "$INFO_PLIST"
 /usr/bin/plutil -insert CFBundleExecutable -string "$PRODUCT_NAME" "$INFO_PLIST"

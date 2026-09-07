@@ -7,7 +7,7 @@ window. Until that changes:
 
 - The menu bar alternates Codex and connected Claude every 10 seconds, starting
   with Codex. It stays on Codex when Claude is disconnected.
-- Use a terminal symbol for Codex and an asterisk symbol for Claude, plus the
+- Use the OpenAI knot for Codex and the Claude starburst for Claude, plus the
   service name: `Codex 57% | Sunday`, `Claude 80% | Monday`.
 - Claude uses only its overall weekly window. Old/failed observations append `*`
   to the percentage; the tooltip explains that marker and gives exact reset and

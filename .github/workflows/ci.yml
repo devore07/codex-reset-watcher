@@ -50,6 +50,8 @@ jobs:
           test -d "dist/Codex Reset Watcher.app"
           test -f "dist/Codex Reset Watcher.app/Contents/Resources/AppIcon.icns"
           test -f "dist/Codex Reset Watcher.app/Contents/Resources/UsageHeader.png"
+          test -f "dist/Codex Reset Watcher.app/Contents/Resources/OpenAI.pdf"
+          test -f "dist/Codex Reset Watcher.app/Contents/Resources/Claude.pdf"
           plutil -lint "dist/Codex Reset Watcher.app/Contents/Info.plist"
           codesign --verify --deep --strict --verbose=2 "dist/Codex Reset Watcher.app"
           APP_BINARY="dist/Codex Reset Watcher.app/Contents/MacOS/CodexResetWatcher"
