@@ -4,11 +4,12 @@ import SwiftUI
 struct ClaudeUsageRows: View {
     @ObservedObject var store: ClaudeUsageStore
     var openDetails: (() -> Void)?
+    var heading = "Claude"
 
     var body: some View {
         VStack(alignment: .leading, spacing: CodexStyle.Spacing.tight) {
             HStack {
-                Text("Claude")
+                Text(heading)
                     .font(CodexStyle.Typography.menuRowTitle)
                 Spacer()
                 Text(store.statusTitle)

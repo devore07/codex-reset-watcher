@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.7.0
+
+- Add a unified desktop Dashboard with Codex on the left and Claude on the right.
+- Keep provider loading, unavailable, expired and last-reported states independent,
+  with shared Refresh and appearance controls.
+- Widen the desktop window to keep usage meters and reset expiry dates readable;
+  retain Claude connection settings and cached Codex snapshots in the sidebar.
+
 ## v0.6.1
 
 - Show server-reported Fable weekly usage beside Claude's five-hour and overall

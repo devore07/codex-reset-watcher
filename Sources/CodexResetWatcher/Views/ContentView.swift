@@ -19,6 +19,7 @@ struct ContentView: View {
                 } else {
                     AccountDetailView(
                         detail: store.detail(),
+                        claudeStore: claudeStore,
                         cachedAccountCount: store.cachedSnapshots.count,
                         appearanceModeRawValue: $appearanceModeRawValue,
                         onRefresh: {

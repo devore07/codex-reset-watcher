@@ -16,7 +16,7 @@ struct AccountSidebarView: View {
             switch newValue {
             case .claude:
                 claudeStore.showingClaude = true
-            case let .codex(account):
+            case .codex(let account):
                 claudeStore.showingClaude = false
                 store.select(account)
             case nil:
@@ -29,9 +29,18 @@ struct AccountSidebarView: View {
         VStack(spacing: 0) {
             List(selection: selection) {
                 if let active = store.sidebarRows.first {
-                    Section("Codex · Active account") {
-                        sidebarRow(active)
-                            .tag(Selection.codex(active.selection))
+                    Section("Codex + Claude") {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Label("Dashboard", systemImage: "square.grid.2x2")
+                                .font(CodexStyle.Typography.sidebarTitle)
+                            Text(active.label)
+                                .font(CodexStyle.Typography.sidebarDetail)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                        }
+                        .padding(.vertical, 2)
+                        .tag(Selection.codex(active.selection))
                     }
                 }
 

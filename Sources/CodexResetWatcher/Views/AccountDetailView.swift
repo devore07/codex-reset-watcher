@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AccountDetailView: View {
     let detail: AccountDetailState
+    @ObservedObject var claudeStore: ClaudeUsageStore
     let cachedAccountCount: Int
     @Binding var appearanceModeRawValue: String
     let onRefresh: () -> Void
@@ -17,24 +18,18 @@ struct AccountDetailView: View {
                 snapshotBanner
             }
 
-            ForEach(detail.errorMessages, id: \.self) { message in
-                errorBanner(message)
-            }
-
-            if detail.usageWindows.isEmpty, detail.credits.isEmpty, detail.liveState == .loading {
-                loadingState
-            } else {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: CodexStyle.Spacing.desktopStack) {
-                        NudgeCardView(nudge: detail.nudge)
-
-                        if !detail.usageWindows.isEmpty {
-                            usageSection
-                        }
-
-                        resetSection
+            ScrollView {
+                if detail.isActive {
+                    HStack(alignment: .top, spacing: CodexStyle.Spacing.section) {
+                        codexColumn
+                            .frame(maxWidth: .infinity, alignment: .topLeading)
+                        ClaudeDashboardPanel(store: claudeStore)
+                            .frame(maxWidth: .infinity, alignment: .topLeading)
                     }
                     .padding(.vertical, 2)
+                } else {
+                    codexColumn
+                        .padding(.vertical, 2)
                 }
             }
 
@@ -42,6 +37,37 @@ struct AccountDetailView: View {
         }
         .padding(CodexStyle.Spacing.desktopPage)
         .background(CodexPalette.appBackground)
+    }
+
+    private var codexColumn: some View {
+        VStack(alignment: .leading, spacing: CodexStyle.Spacing.desktopStack) {
+            if detail.isActive {
+                HStack {
+                    Label("Codex", systemImage: "terminal")
+                        .font(CodexStyle.Typography.sectionTitle)
+                    Spacer()
+                    Text(detail.statusTitle)
+                        .font(CodexStyle.Typography.caption)
+                        .foregroundStyle(CodexPalette.secondaryText)
+                }
+                Text("Usage and reset credits")
+                    .font(CodexStyle.Typography.caption)
+                    .foregroundStyle(CodexPalette.secondaryText)
+            }
+            ForEach(detail.errorMessages, id: \.self) { message in
+                errorBanner(message)
+            }
+            if detail.usageWindows.isEmpty, detail.credits.isEmpty, detail.liveState == .loading {
+                loadingState
+                    .padding(CodexStyle.Spacing.panel)
+            } else {
+                if !detail.usageWindows.isEmpty {
+                    usageSection
+                }
+                resetSection
+                NudgeCardView(nudge: detail.nudge)
+            }
+        }
     }
 
     private var headerCard: some View {
@@ -93,9 +119,9 @@ struct AccountDetailView: View {
             return "checking reset credits"
         case .unavailable:
             return "reset count unavailable"
-        case let .known(count):
+        case .known(let count):
             let noun = count == 1 ? "reset credit" : "reset credits"
-            return detail.isCached ? "\(noun) last seen" : "\(noun) available"
+            return detail.isCached ? "\(noun) last seen" : "Codex \(noun) available"
         }
     }
 
@@ -105,7 +131,7 @@ struct AccountDetailView: View {
             return "..."
         case .unavailable:
             return "-"
-        case let .known(count):
+        case .known(let count):
             return "\(count)"
         }
     }
@@ -122,10 +148,14 @@ struct AccountDetailView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(detail.statusTitle)
                     .font(CodexStyle.Typography.cardTitle)
-                Text(detail.isStale ? "This saved reset time has passed. Refresh checks the account currently signed in to Codex." : "This saved snapshot does not update live. Refresh checks the account currently signed in to Codex.")
-                    .font(.subheadline)
-                    .foregroundStyle(CodexPalette.secondaryText)
-                    .fixedSize(horizontal: false, vertical: true)
+                Text(
+                    detail.isStale
+                        ? "This saved reset time has passed. Refresh checks the account currently signed in to Codex."
+                        : "This saved snapshot does not update live. Refresh checks the account currently signed in to Codex."
+                )
+                .font(.subheadline)
+                .foregroundStyle(CodexPalette.secondaryText)
+                .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(CodexStyle.Spacing.panel)
@@ -140,7 +170,10 @@ struct AccountDetailView: View {
         VStack(alignment: .leading, spacing: CodexStyle.Spacing.desktopStack) {
             CodexSectionHeader(title: "Current limits", detail: detail.isCached ? "Last saved values" : "Live from Codex")
 
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 245), spacing: CodexStyle.Spacing.desktopStack)], spacing: CodexStyle.Spacing.desktopStack) {
+            LazyVGrid(
+                columns: [GridItem(.adaptive(minimum: 245), spacing: CodexStyle.Spacing.desktopStack)],
+                spacing: CodexStyle.Spacing.desktopStack
+            ) {
                 ForEach(detail.usageWindows) { window in
                     UsageLimitCardView(window: window, isCached: detail.isCached)
                 }
@@ -187,7 +220,7 @@ struct AccountDetailView: View {
             return "Checking availability"
         case .unavailable:
             return "Count unavailable"
-        case let .known(count):
+        case .known(let count):
             return "\(count) \(detail.isCached ? "last seen" : "available")"
         }
     }
@@ -264,7 +297,7 @@ struct AccountDetailView: View {
         if detail.isCached {
             return "Cached snapshot"
         }
-        return "Updates every 5 min"
+        return "Codex checks every 5 min · Claude follows its source"
     }
 
     private var hasSnapshotActions: Bool {

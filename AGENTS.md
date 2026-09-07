@@ -10,9 +10,9 @@ Codex usage limits and reset credits. Keep changes scoped to that product.
 - Public GitHub repo: `https://github.com/jordan-edai/codex-reset-watcher`
 - Canonical local path: `/Users/everydayai/Documents/!Codex Projects/Rate Refresher Project`
 - Compatibility path: `/Users/everydayai/Documents/Rate Refresher Project`
-- Release version: `v0.6.1`
+- Release version: `v0.7.0`
 - Check `git log --oneline --decorate -5` for the current `main` commit; this
-  note tracks the repo state through the `v0.6.1` Claude Desktop Fable allowance display.
+  note tracks the repo state through the `v0.7.0` unified usage dashboard.
 - App bundle version is set in `script/build_and_run.sh`.
 
 ## Product Decisions
@@ -98,6 +98,10 @@ Codex usage limits and reset credits. Keep changes scoped to that product.
 - Menu cached-snapshot rows should focus the existing main window and update the
   shared account selection. Do not call `openWindow(id: "main")` directly from
   those rows, because `WindowGroup` can create duplicate main windows.
+- The active desktop Dashboard shows Codex and Claude side by side; keep provider
+  errors/loading independent and reset credits/advice under Codex. Cached snapshots
+  remain separate from the live dashboard. Keep one shared Refresh and appearance
+  footer, with Claude connection controls accessible from the sidebar.
 - The desktop window intentionally uses a fixed two-pane sidebar/detail shell,
   not a native `NavigationSplitView`. The native split view's sidebar toggle can
   hide the account list in this compact utility window.
