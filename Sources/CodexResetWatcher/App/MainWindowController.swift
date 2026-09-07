@@ -5,19 +5,20 @@ import SwiftUI
 final class MainWindowController: ObservableObject {
     private static let mainIdentifier = NSUserInterfaceItemIdentifier("codex-reset-watcher-main-window")
     private static let mainTitle = "Codex Reset Watcher"
-    private static let minimumSize = NSSize(
-        width: CodexStyle.Size.mainWindowMinWidth,
-        height: CodexStyle.Size.mainWindowMinHeight
-    )
+    private var mode: DashboardViewMode = .detailed
+    private var registeredMode: DashboardViewMode?
 
     private weak var window: NSWindow?
 
-    func register(_ window: NSWindow) {
+    func register(_ window: NSWindow, mode: DashboardViewMode? = nil) {
         guard Self.looksLikeMainWindow(window) else {
             return
         }
         window.identifier = Self.mainIdentifier
-        applySizing(to: window)
+        if let mode { self.mode = mode }
+        let changedMode = registeredMode != self.mode
+        registeredMode = self.mode
+        applySizing(to: window, resizeToDefault: changedMode)
         if self.window == nil || self.window?.isVisible != true {
             self.window = window
         }
@@ -53,7 +54,7 @@ final class MainWindowController: ObservableObject {
 
     private func registeredWindow() -> NSWindow? {
         guard let window,
-              window.isVisible || window.isMiniaturized
+            window.isVisible || window.isMiniaturized
         else {
             return nil
         }
@@ -75,17 +76,19 @@ final class MainWindowController: ObservableObject {
         window.makeKeyAndOrderFront(nil)
     }
 
-    private func applySizing(to window: NSWindow) {
-        window.minSize = Self.minimumSize
+    private func applySizing(to window: NSWindow, resizeToDefault: Bool = false) {
+        let minimumSize = window.frameRect(forContentRect: NSRect(origin: .zero, size: mode.minimumSize)).size
+        window.minSize = minimumSize
 
         let frame = window.frame
-        guard frame.width < Self.minimumSize.width || frame.height < Self.minimumSize.height else {
+        guard resizeToDefault || frame.width < minimumSize.width || frame.height < minimumSize.height else {
             return
         }
 
         var resizedFrame = frame
-        let newWidth = max(frame.width, Self.minimumSize.width)
-        let newHeight = max(frame.height, Self.minimumSize.height)
+        let targetSize = window.frameRect(forContentRect: NSRect(origin: .zero, size: mode.defaultSize)).size
+        let newWidth = resizeToDefault ? targetSize.width : max(frame.width, minimumSize.width)
+        let newHeight = resizeToDefault ? targetSize.height : max(frame.height, minimumSize.height)
         resizedFrame.origin.y -= newHeight - frame.height
         resizedFrame.size = NSSize(width: newWidth, height: newHeight)
         resizedFrame = clampedToVisibleScreen(resizedFrame, for: window)
@@ -140,11 +143,13 @@ final class MainWindowController: ObservableObject {
 
     private func preferredMainWindow(from windows: [NSWindow], fallback: NSWindow) -> NSWindow {
         if let keyWindow = NSApp.keyWindow,
-           windows.contains(where: { $0 === keyWindow }) {
+            windows.contains(where: { $0 === keyWindow })
+        {
             return keyWindow
         }
         if let mainWindow = NSApp.mainWindow,
-           windows.contains(where: { $0 === mainWindow }) {
+            windows.contains(where: { $0 === mainWindow })
+        {
             return mainWindow
         }
         if windows.contains(where: { $0 === fallback }) {
@@ -166,11 +171,13 @@ struct MainWindowReader: NSViewRepresentable {
     }
 
     func updateNSView(_ nsView: NSView, context: Context) {
-        (nsView as? WindowResolvingView)?.resolveWindow()
+        guard let view = nsView as? WindowResolvingView else { return }
+        view.onResolve = onResolve
+        view.resolveWindow()
     }
 
     private final class WindowResolvingView: NSView {
-        let onResolve: @MainActor (NSWindow) -> Void
+        var onResolve: @MainActor (NSWindow) -> Void
 
         init(onResolve: @escaping @MainActor (NSWindow) -> Void) {
             self.onResolve = onResolve

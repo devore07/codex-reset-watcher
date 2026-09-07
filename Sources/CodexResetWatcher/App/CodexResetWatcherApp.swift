@@ -5,6 +5,7 @@ import SwiftUI
 struct CodexResetWatcherApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @AppStorage("appearanceMode") private var appearanceModeRawValue = CodexAppearanceMode.auto.rawValue
+    @AppStorage("dashboardViewMode") private var dashboardViewModeRawValue = DashboardViewMode.detailed.rawValue
     @StateObject private var store = ResetCreditsStore()
     @StateObject private var claudeStore = ClaudeUsageStore()
     @StateObject private var mainWindowController = MainWindowController()
@@ -13,35 +14,42 @@ struct CodexResetWatcherApp: App {
         CodexAppearanceMode(rawValue: appearanceModeRawValue) ?? .auto
     }
 
+    private var dashboardViewMode: DashboardViewMode {
+        DashboardViewMode(rawValue: dashboardViewModeRawValue) ?? .detailed
+    }
+
     var body: some Scene {
         WindowGroup("Codex Reset Watcher", id: "main") {
-            ContentView(store: store, claudeStore: claudeStore, appearanceModeRawValue: $appearanceModeRawValue)
-                .preferredColorScheme(appearanceMode.colorScheme)
-                .onAppear {
-                    applyAppearanceMode()
+            ContentView(
+                store: store, claudeStore: claudeStore, appearanceModeRawValue: $appearanceModeRawValue,
+                dashboardViewModeRawValue: $dashboardViewModeRawValue
+            )
+            .preferredColorScheme(appearanceMode.colorScheme)
+            .onAppear {
+                applyAppearanceMode()
+            }
+            .onChange(of: appearanceModeRawValue) {
+                applyAppearanceMode()
+            }
+            .background {
+                MainWindowReader { window in
+                    mainWindowController.register(window, mode: dashboardViewMode)
                 }
-                .onChange(of: appearanceModeRawValue) {
-                    applyAppearanceMode()
-                }
-                .background {
-                    MainWindowReader { window in
-                        mainWindowController.register(window)
-                    }
-                }
-                .frame(
-                    minWidth: CodexStyle.Size.mainWindowMinWidth,
-                    idealWidth: CodexStyle.Size.mainWindowDefaultWidth,
-                    minHeight: CodexStyle.Size.mainWindowMinHeight,
-                    idealHeight: CodexStyle.Size.mainWindowDefaultHeight
-                )
-                .task {
-                    store.start()
-                    claudeStore.start()
-                }
+            }
+            .frame(
+                minWidth: dashboardViewMode.minimumSize.width,
+                idealWidth: dashboardViewMode.defaultSize.width,
+                minHeight: dashboardViewMode.minimumSize.height,
+                idealHeight: dashboardViewMode.defaultSize.height
+            )
+            .task {
+                store.start()
+                claudeStore.start()
+            }
         }
         .defaultSize(
-            width: CodexStyle.Size.mainWindowDefaultWidth,
-            height: CodexStyle.Size.mainWindowDefaultHeight
+            width: dashboardViewMode.defaultSize.width,
+            height: dashboardViewMode.defaultSize.height
         )
         .commands {
             CommandGroup(replacing: .newItem) {}
@@ -63,19 +71,19 @@ struct CodexResetWatcherApp: App {
                 mainWindowController: mainWindowController,
                 appearanceModeRawValue: $appearanceModeRawValue
             )
-                .preferredColorScheme(appearanceMode.colorScheme)
-                .onAppear {
-                    applyAppearanceMode()
-                    claudeStore.reload()
-                }
-                .onChange(of: appearanceModeRawValue) {
-                    applyAppearanceMode()
-                }
-                .task {
-                    store.start()
-                    claudeStore.start()
-                    claudeStore.reload()
-                }
+            .preferredColorScheme(appearanceMode.colorScheme)
+            .onAppear {
+                applyAppearanceMode()
+                claudeStore.reload()
+            }
+            .onChange(of: appearanceModeRawValue) {
+                applyAppearanceMode()
+            }
+            .task {
+                store.start()
+                claudeStore.start()
+                claudeStore.reload()
+            }
         } label: {
             WeeklyMenuBarLabel(store: store, claudeStore: claudeStore)
         }

@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.8.0
+
+- Add a saved Compact / Detailed dashboard control that resizes the same window.
+- Compact shows only provider remaining-usage meters and banked Codex reset counts
+  and expiration dates, with shared Refresh and appearance controls.
+- Preserve missing, blocked, old and expired readings; use Detailed for usage
+  timing, connection settings, advice and cached snapshots.
+
 ## v0.7.3
 
 - Replace generic menu-bar service symbols with the OpenAI knot and Claude

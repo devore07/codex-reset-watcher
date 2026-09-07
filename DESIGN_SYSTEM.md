@@ -81,7 +81,19 @@ the visual priority.
   Keep reset credits/advice under Codex and label Claude’s source and receipt
   time. One footer refreshes both sources and controls appearance. Claude
   connection settings and cached Codex snapshots remain sidebar destinations.
-  The desktop minimum width is 1180 points; default width is 1240 points.
+  Detailed minimum content size is 1180 × 724 points; default is 1240 × 730.
+- A persistent Compact / Detailed control stays above both desktop layouts.
+  Switching presets resizes the same window, preserving normal macOS chrome.
+  Compact uses a 600 × 510 point content area with no sidebar or header artwork:
+  two provider cards with remaining percentages and shared meters, followed by
+  one Codex banked-reset count/expiry list. No used percentages, usage-reset
+  timing, account identity, setup prose or advice appear in Compact.
+  Keep blocked, unavailable, old and passed-reset status explicit. Only display
+  Fable when reported; Detailed explains source limitations. Four ordinary reset
+  rows fit at the default size; unusually many rows can scroll within the desktop
+  content, while size/appearance/refresh controls stay visible.
+  Compact always uses the active Codex account. Opening connection settings or
+  a cached snapshot selects Detailed. Keep the menu dropdown unchanged.
 - Keep the desktop multi-account sidebar native and lightweight: one icon, one
   account label line, and one cached/active/stale detail line. Put dense metrics
   in the detail pane, not the sidebar.
