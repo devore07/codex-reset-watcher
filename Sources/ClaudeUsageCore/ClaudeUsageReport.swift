@@ -25,7 +25,7 @@ public struct ClaudeUsageWindow: Codable, Equatable, Sendable {
 
     public var remainingPercentage: Double? { usedPercentage.map { 100 - $0 } }
     public var resetDate: Date? { resetsAt.map(Date.init(timeIntervalSince1970:)) }
-    public func hasExpired(at now: Date) -> Bool { resetDate.map { $0 <= now } ?? false }
+    public func hasExpired(at now: Date) -> Bool { resetsAt.map { $0 <= now.timeIntervalSince1970 } ?? false }
 }
 
 /// A derived model allowance; names are allowlisted rather than copying arbitrary server text.
