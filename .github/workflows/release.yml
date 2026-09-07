@@ -69,6 +69,8 @@ jobs:
           test -d "$APP_BUNDLE"
           test -f "$APP_BUNDLE/Contents/Resources/AppIcon.icns"
           test -f "$APP_BUNDLE/Contents/Resources/UsageHeader.png"
+          test -f "$APP_BUNDLE/Contents/Resources/OpenAI.pdf"
+          test -f "$APP_BUNDLE/Contents/Resources/Claude.pdf"
           /usr/bin/plutil -lint "$INFO_PLIST"
 
           APP_BINARY="$APP_BUNDLE/Contents/MacOS/CodexResetWatcher"

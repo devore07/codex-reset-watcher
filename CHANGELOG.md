@@ -1,6 +1,9 @@
 # Changelog
 
-## Unreleased
+## v0.7.3
+
+- Replace generic menu-bar service symbols with the OpenAI knot and Claude
+  starburst, rendered as crisp monochrome vector templates.
 
 - Add a fully redacted, digest-pinned secret scan to CI and an installable local
   pre-push guard; document the public-history and release-archive audit.

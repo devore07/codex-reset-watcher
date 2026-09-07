@@ -10,9 +10,9 @@ Codex usage limits and reset credits. Keep changes scoped to that product.
 - Public GitHub repo: `https://github.com/jordan-edai/codex-reset-watcher`
 - Canonical local path: `/Users/everydayai/Documents/!Codex Projects/Rate Refresher Project`
 - Compatibility path: `/Users/everydayai/Documents/Rate Refresher Project`
-- Release version: `v0.7.2`
+- Release version: `v0.7.3`
 - Check `git log --oneline --decorate -5` for the current `main` commit; this
-  note tracks the repo state through the `v0.7.2` rotating weekly menu-bar display.
+  note tracks the repo state through the `v0.7.3` rotating weekly menu-bar display.
 - App bundle version is set in `script/build_and_run.sh`.
 
 ## Product Decisions
@@ -28,7 +28,8 @@ Codex usage limits and reset credits. Keep changes scoped to that product.
 - These endpoints can change without notice. Keep decoding tolerant and failure
   handling partial-data-friendly.
 - The menu bar alternates Codex and connected Claude weekly usage every 10 seconds,
-  using terminal/asterisk symbols, service names, percentages and reset weekdays.
+  using OpenAI knot/Claude starburst template images, service names, percentages
+  and reset weekdays.
   Stay on Codex when Claude is disconnected. Keep rotation independent of refresh.
   Claude old/failed readings append `*`; passed resets show `--% | updating`.
   Never substitute banked reset counts, account labels, five-hour or Fable data.

@@ -19,7 +19,8 @@ struct WeeklyMenuBarLabel: View {
 
     var body: some View {
         HStack(spacing: 4) {
-            Image(systemName: showingClaude ? "asterisk" : "terminal.fill")
+            Image(nsImage: showingClaude ? ProviderMark.claude : ProviderMark.codex)
+                .renderingMode(.template)
             if !showingClaude, store.statusSymbolName.hasPrefix("exclamationmark") {
                 Image(systemName: store.statusSymbolName)
             }

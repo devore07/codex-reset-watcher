@@ -86,7 +86,7 @@ the visual priority.
   account label line, and one cached/active/stale detail line. Put dense metrics
   in the detail pane, not the sidebar.
 - Keep the menu bar weekly, alternating Codex and connected Claude every 10
-  seconds. Use a terminal/asterisk symbol and service name with the percentage
+  seconds. Use the OpenAI knot/Claude starburst template image and service name with the percentage
   and reset weekday. Missing timing uses `week`; missing weekly data uses `--%`.
   Claude old/failed readings carry `*` with an explanatory tooltip; passed resets
   show `--% | updating`. Keep reset counts and account labels out of the title.
