@@ -70,21 +70,13 @@ final class ResetCreditsStore: ObservableObject {
     }
 
     var menuBarTitle: String {
-        guard let weekly = usageWindows.first(where: { $0.kind == .weekly }),
-              let remaining = weekly.remainingPercent else {
-            return "--% | week"
-        }
-        return "\(remaining)% | \(weeklyResetCue(for: weekly.window))"
+        menuBarPresentation(at: Date()).title
     }
 
-    private func weeklyResetCue(for window: UsageLimitWindow) -> String {
-        if let resetDate = window.resetDate {
-            return DateFormatting.weekdayName(resetDate)
-        }
-        guard let seconds = window.resetAfterSeconds else {
-            return "week"
-        }
-        return DateFormatting.weekdayName(Date().addingTimeInterval(TimeInterval(max(0, seconds))))
+    func menuBarPresentation(at now: Date) -> WeeklyMenuBarPresentation {
+        .codex(
+            windows: displays(for: usage, capturedAt: usageCapturedAt, now: now),
+            capturedAt: usageCapturedAt, hasError: usageErrorMessage != nil, now: now)
     }
 
     var statusSymbolName: String {
@@ -653,7 +645,9 @@ final class ResetCreditsStore: ObservableObject {
             isRefreshing: isRefreshing,
             canRefresh: true,
             canForget: false,
-            refreshActionTitle: "Refresh"
+            refreshActionTitle: "Refresh",
+            usageCapturedAt: usageCapturedAt,
+            usageHasError: usageErrorMessage != nil
         )
     }
 
@@ -693,7 +687,9 @@ final class ResetCreditsStore: ObservableObject {
             isRefreshing: false,
             canRefresh: true,
             canForget: true,
-            refreshActionTitle: "Refresh active account"
+            refreshActionTitle: "Refresh active account",
+            usageCapturedAt: snapshot.usageCapturedAt,
+            usageHasError: snapshot.errors.contains(.usageFailed)
         )
     }
 

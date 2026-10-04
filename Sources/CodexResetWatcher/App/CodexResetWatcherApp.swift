@@ -9,6 +9,7 @@ struct CodexResetWatcherApp: App {
     @StateObject private var store = ResetCreditsStore()
     @StateObject private var claudeStore = ClaudeUsageStore()
     @StateObject private var mainWindowController = MainWindowController()
+    @StateObject private var notifications = UsageNotifications()
 
     private var appearanceMode: CodexAppearanceMode {
         CodexAppearanceMode(rawValue: appearanceModeRawValue) ?? .auto
@@ -80,8 +81,16 @@ struct CodexResetWatcherApp: App {
                 }
         } label: {
             WeeklyMenuBarLabel(store: store, claudeStore: claudeStore)
+                .onReceive(claudeStore.$now) { now in
+                    Task { await notifications.check(codex: store, claude: claudeStore, now: now) }
+                }
         }
         .menuBarExtraStyle(.window)
+
+        Settings {
+            WatcherSettingsView(notifications: notifications)
+                .preferredColorScheme(appearanceMode.colorScheme)
+        }
     }
 
     private func applyAppearanceMode() {

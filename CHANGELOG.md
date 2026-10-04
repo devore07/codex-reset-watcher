@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.9.0
+
+- Mark old/failed Codex readings consistently with Claude and hide menu-title
+  percentages after their reset time passes.
+- Add usage reset countdowns and last-updated labels to Compact mode, preserving
+  missing timing, failed readings and passed-reset states.
+- Add opt-in, silent local alerts for low overall capacity and Codex resets
+  expiring within 24 hours. Deduplicate warnings across refreshes and restarts;
+  ignore old, failed and cached data.
+- Add native launch at login and notification settings, accessible from the
+  dropdown gear or Command-comma. Both features are off by default.
+
 ## v0.8.0
 
 - Add a saved Compact / Detailed switch to the dropdown opened from the menu bar.

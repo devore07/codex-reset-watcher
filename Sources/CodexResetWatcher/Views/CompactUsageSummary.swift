@@ -17,13 +17,13 @@ struct CompactUsageSummary: View {
                             .foregroundStyle(CodexPalette.secondaryText)
                     }
                     ForEach(detail.usageWindows) { window in
-                        CompactRemainingRow(
-                            title: window.title, remaining: window.remainingPercent,
-                            status: window.limitReached ? "Limit reached" : nil,
-                            tone: window.limitReached ? .danger : .usage(remainingPercent: window.remainingPercent))
+                        codexRow(window)
                     }
+                    Text(DateFormatting.usageUpdated(detail.usageCapturedAt, old: codexOld))
+                        .font(CodexStyle.Typography.caption)
+                        .foregroundStyle(CodexPalette.secondaryText)
                     if detail.liveState != .live {
-                        Text(detail.statusTitle)
+                        Text(detail.statusDetail)
                             .font(CodexStyle.Typography.caption)
                             .foregroundStyle(CodexPalette.secondaryText)
                             .help(detail.errorMessages.joined(separator: "\n"))
@@ -36,14 +36,12 @@ struct CompactUsageSummary: View {
                         ForEach(report.fableWeekly) { fable in
                             claudeRow("\(fable.model.rawValue) weekly", window: fable.window)
                         }
-                        if report.isOld(at: claudeStore.now) || claudeStore.errorMessage != nil || claudeStore.configurationChanged {
-                            Text("Last reported · \(DateFormatting.timeOnly(report.receiptDate))")
-                                .font(CodexStyle.Typography.caption)
-                                .foregroundStyle(CodexPalette.secondaryText)
-                                .help(
-                                    [claudeStore.receiptLabel, claudeStore.errorMessage, claudeStore.statusTitle].compactMap { $0 }.joined(
-                                        separator: "\n"))
-                        }
+                        Text(DateFormatting.usageUpdated(report.receiptDate, old: claudeOld))
+                            .font(CodexStyle.Typography.caption)
+                            .foregroundStyle(CodexPalette.secondaryText)
+                            .help(
+                                [claudeStore.receiptLabel, claudeStore.errorMessage, claudeStore.statusTitle].compactMap { $0 }.joined(
+                                    separator: "\n"))
                     } else {
                         Text(claudeStore.statusTitle)
                             .font(CodexStyle.Typography.caption)
@@ -53,6 +51,26 @@ struct CompactUsageSummary: View {
             }
             resets
         }
+    }
+
+    private var codexOld: Bool {
+        UsageFreshness.isOld(capturedAt: detail.usageCapturedAt, hasError: detail.usageHasError, now: claudeStore.now)
+    }
+
+    private var claudeOld: Bool {
+        claudeStore.report?.isOld(at: claudeStore.now) == true
+            || claudeStore.errorMessage != nil || claudeStore.configurationChanged
+    }
+
+    private func codexRow(_ display: UsageLimitDisplay) -> some View {
+        let expired = display.window.hasExpired(at: claudeStore.now)
+        let remaining = expired ? nil : display.remainingPercent
+        return CompactRemainingRow(
+            title: display.title, remaining: remaining,
+            status: expired ? "Awaiting updated usage" : (display.limitReached ? "Limit reached" : nil),
+            resetText: DateFormatting.usageReset(
+                display.window.resetDate, seconds: display.window.resetAfterSeconds, now: claudeStore.now),
+            tone: display.limitReached && !expired ? .danger : (codexOld ? .muted : .usage(remainingPercent: remaining)))
     }
 
     private func provider<Content: View>(_ name: String, image: NSImage, @ViewBuilder content: () -> Content) -> some View {
@@ -73,11 +91,11 @@ struct CompactUsageSummary: View {
     private func claudeRow(_ title: String, window: ClaudeUsageWindow?) -> some View {
         let expired = window?.hasExpired(at: claudeStore.now) == true
         let remaining = expired ? nil : window?.remainingPercentage.map { Int($0.rounded(.down)) }
-        let old = claudeStore.report?.isOld(at: claudeStore.now) == true || claudeStore.errorMessage != nil
         return CompactRemainingRow(
             title: title, remaining: remaining,
             status: expired ? "Awaiting updated usage" : (remaining == nil ? "Not reported" : nil),
-            tone: old ? .muted : .usage(remainingPercent: remaining))
+            resetText: DateFormatting.usageReset(window?.resetDate, now: claudeStore.now),
+            tone: claudeOld ? .muted : .usage(remainingPercent: remaining))
     }
 
     private var resets: some View {
@@ -132,6 +150,7 @@ private struct CompactRemainingRow: View {
     let title: String
     let remaining: Int?
     let status: String?
+    let resetText: String
     let tone: CodexTone
 
     var body: some View {
@@ -145,6 +164,9 @@ private struct CompactRemainingRow: View {
             LimitMeterView(label: "\(title) remaining", remainingPercent: remaining, tone: tone)
             if let status {
                 Text(status).font(CodexStyle.Typography.caption).foregroundStyle(tone.foreground)
+            }
+            if status != resetText {
+                Text(resetText).font(CodexStyle.Typography.caption).foregroundStyle(CodexPalette.secondaryText)
             }
         }
         .accessibilityElement(children: .combine)

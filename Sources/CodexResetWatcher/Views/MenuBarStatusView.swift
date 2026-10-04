@@ -106,6 +106,12 @@ struct MenuBarStatusView: View {
 
             Spacer()
 
+            SettingsLink {
+                Image(systemName: "gearshape")
+            }
+            .help("Settings")
+            .accessibilityLabel("Settings")
+
             Button("Open") {
                 showMainWindow()
             }
@@ -184,9 +190,14 @@ struct MenuBarStatusView: View {
                 Text("Codex: \(store.accountDisplayLabel)")
                     .font(CodexStyle.Typography.menuRowMeta)
                     .lineLimit(1).truncationMode(.middle)
-                Text(DateFormatting.checked(store.lastChecked))
-                    .font(CodexStyle.Typography.menuRowMeta)
-                    .foregroundStyle(CodexPalette.secondaryText)
+                Text(
+                    DateFormatting.usageUpdated(
+                        store.usageCapturedAt,
+                        old: UsageFreshness.isOld(
+                            capturedAt: store.usageCapturedAt, hasError: store.usageErrorMessage != nil, now: claudeStore.now))
+                )
+                .font(CodexStyle.Typography.menuRowMeta)
+                .foregroundStyle(CodexPalette.secondaryText)
             }
             Spacer()
             if store.isRefreshing {
@@ -489,6 +500,11 @@ struct MenuBarStatusView: View {
     }
 
     private var currentLimitsDetail: String {
+        if store.usage != nil,
+            UsageFreshness.isOld(capturedAt: store.usageCapturedAt, hasError: store.usageErrorMessage != nil, now: claudeStore.now)
+        {
+            return "Old reading"
+        }
         switch store.liveState {
         case .loading:
             return "Checking"

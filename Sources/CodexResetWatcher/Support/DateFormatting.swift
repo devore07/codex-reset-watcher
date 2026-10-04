@@ -117,6 +117,18 @@ enum DateFormatting {
         return displayString(fullFormatter, date: date)
     }
 
+    static func usageUpdated(_ date: Date?, old: Bool) -> String {
+        guard let date else { return "No usage reading yet" }
+        return "Last updated \(weekdayCompact(date))\(old ? " · Old" : "")"
+    }
+
+    static func usageReset(_ date: Date?, seconds: Int? = nil, now: Date) -> String {
+        let remaining = date.flatMap { Int(exactly: ceil($0.timeIntervalSince(now))) } ?? seconds
+        guard let remaining else { return "Reset time unavailable" }
+        guard remaining > 0 else { return "Awaiting updated usage" }
+        return "Resets in \(duration(seconds: remaining))"
+    }
+
     static func duration(seconds: Int?) -> String {
         guard let seconds else {
             return "-"

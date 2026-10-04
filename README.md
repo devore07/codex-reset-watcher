@@ -7,8 +7,8 @@ Unofficial macOS utility for checking Codex rate-limit windows and banked reset 
 It reads your existing local Codex Desktop login from `~/.codex/auth.json`, calls the same internal Codex Desktop endpoints used by the app, and shows:
 
 - a saved **Compact / Detailed** switch in the menu-bar dropdown: Compact shows
-  remaining usage and banked Codex reset expirations in a small popover; Detailed
-  expands the dropdown with reset timing, larger rows and advice
+  remaining usage, usage reset countdowns, last-updated times and banked Codex
+  reset expirations; Detailed expands the dropdown with larger rows and advice
 - a desktop **Dashboard** with Codex usage and reset credits on the left and
   Claude usage on the right, with shared Refresh and appearance controls
 - current weekly usage remaining
@@ -16,7 +16,7 @@ It reads your existing local Codex Desktop login from `~/.codex/auth.json`, call
 - weekly menu bar status alternating every 10 seconds between Codex and connected
   Claude, with a OpenAI knot/Claude starburst service symbol, service name, remaining capacity
   and reset weekday (for example `Codex 57% | Sunday` or `Claude 80% | Monday`)
-- an asterisk after Claude’s percentage marks an old or failed reading; hover for
+- an asterisk after either provider’s percentage marks an old or failed reading; hover for
   the exact reset and receipt time. Passed resets show `--% | updating`.
   Without a Claude connection, the menu bar stays on Codex.
 - a natural-height menu dropdown with no forced full-screen viewport
@@ -35,6 +35,36 @@ It reads your existing local Codex Desktop login from `~/.codex/auth.json`, call
 - a reset-use nudge based on remaining 5h/weekly capacity, reset timing, reset-credit expiry, and reset credits in the bank
 
 Codex Reset Watcher is read-only. It does not redeem resets, reset usage, modify your account, or send analytics.
+
+## Settings and notifications
+
+Open **Settings** using the gear in the dropdown or **Command-comma** in the app.
+**Launch at login** uses macOS Login Items and is off until you enable it. Keep
+the app in a stable location, such as `/Applications`; if approval is required,
+Settings links to macOS Login Items and shows the pending state.
+
+**Enable notifications** is off by default and asks macOS permission only when
+you turn it on. Choose low-capacity alerts at 10%, 20% (default), or 25% remaining,
+and/or a warning when a banked Codex reset expires within 24 hours. Alerts are
+local and silent, and run only while the watcher is open. Low-capacity alerts
+cover known Codex 5-hour/weekly and Claude overall windows, including the first
+fresh reading already below the threshold. They exclude cached snapshots,
+failed/old readings, passed resets, generic windows and model-specific limits.
+
+Readings become old after five minutes, or immediately after a usage check fails.
+Reset-credit failures do not mark a successful usage reading as failed. Compact
+mode shows each provider's actual usage receipt time, not the time of a failed
+check. Missing reset timing stays unavailable; passed resets never imply 100%.
+
+Warnings are deduplicated across refreshes and app restarts: once per usage
+window/reset time, or once per 24 hours if reset timing is missing. Expiry
+warnings with the same expiration are grouped. The app stores only hashed event
+keys and deduplication expiry times in preferences; alerts contain no account
+labels or identifiers. With no Claude account history, subscriptions using the
+same source and reset time share that warning's deduplication key.
+
+These features use Apple's native [login-item service](https://developer.apple.com/documentation/servicemanagement/smappservice)
+and [local notification permission](https://developer.apple.com/documentation/usernotifications/asking-permission-to-use-notifications) APIs.
 
 ## Requirements
 
@@ -111,8 +141,8 @@ you using Claude Code CLI for your work.
 ### Alternative: terminal status-line feed
 
 The terminal source shows five-hour and weekly remaining percentages,
-reset times, and when a local report was received. The menu-bar title continues
-to show Codex weekly capacity. Claude and Codex appear as separate groups in
+reset times, and when a local report was received. The menu-bar title alternates
+Codex and connected Claude weekly capacity. They appear as separate groups in
 the dropdown; select **Claude subscription** in the desktop sidebar for setup.
 
 **Terminal Claude Code 2.1.251 or later is required. The Claude desktop Code tab

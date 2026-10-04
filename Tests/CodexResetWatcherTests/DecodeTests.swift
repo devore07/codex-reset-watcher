@@ -434,8 +434,8 @@ final class CodexAPIClientTests: XCTestCase {
 
     @MainActor
     func testMenuBarTitleShowsSelectedUsageWindowResetCueWhenUsageIsLoaded() async throws {
-        let fiveHourResetAt = localTimestamp(year: 2026, month: 7, day: 17, hour: 21, minute: 50)
-        let weeklyResetAt = localTimestamp(year: 2026, month: 7, day: 19, hour: 8, minute: 0)
+        let fiveHourResetAt = Int(Date().addingTimeInterval(3600).timeIntervalSince1970)
+        let weeklyResetAt = Int(Date().addingTimeInterval(259_200).timeIntervalSince1970)
         let client = try makeClient { request in
             switch request.url?.path {
             case "/backend-api/wham/rate-limit-reset-credits":
@@ -482,8 +482,8 @@ final class CodexAPIClientTests: XCTestCase {
 
     @MainActor
     func testUsageWindowClassificationPrefersDurationWhenEndpointOrderIsSwapped() async throws {
-        let fiveHourResetAt = localTimestamp(year: 2026, month: 7, day: 17, hour: 21, minute: 50)
-        let weeklyResetAt = localTimestamp(year: 2026, month: 7, day: 19, hour: 8, minute: 0)
+        let fiveHourResetAt = Int(Date().addingTimeInterval(3600).timeIntervalSince1970)
+        let weeklyResetAt = Int(Date().addingTimeInterval(259_200).timeIntervalSince1970)
         let client = try makeClient { request in
             switch request.url?.path {
             case "/backend-api/wham/rate-limit-reset-credits":
@@ -530,7 +530,7 @@ final class CodexAPIClientTests: XCTestCase {
 
     @MainActor
     func testMenuBarTitleUsesWeeklyPercentageWhenFiveHourWindowIsMissing() async throws {
-        let weeklyResetAt = localTimestamp(year: 2026, month: 7, day: 19, hour: 16, minute: 0)
+        let weeklyResetAt = Int(Date().addingTimeInterval(604_800).timeIntervalSince1970)
         let client = try makeClient { request in
             switch request.url?.path {
             case "/backend-api/wham/rate-limit-reset-credits":

@@ -69,7 +69,7 @@ final class ClaudeLayoutTests: XCTestCase {
             ).preferredColorScheme(mode.colorScheme)
             let compactSize = NSHostingView(rootView: compact).fittingSize
             XCTAssertEqual(compactSize.width, CodexStyle.Size.compactMenuWidth, accuracy: 1)
-            XCTAssertLessThanOrEqual(compactSize.height, 500, "Compact menu must hug its content")
+            XCTAssertLessThanOrEqual(compactSize.height, 560, "Compact menu including reset timing must hug its content")
             if let output = ProcessInfo.processInfo.environment["CODEX_UI_TEST_OUTPUT"] {
                 let renderer = ImageRenderer(content: compact)
                 renderer.scale = 2

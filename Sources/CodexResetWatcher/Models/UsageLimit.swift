@@ -120,6 +120,12 @@ struct UsageLimitWindow: Decodable, Sendable {
         return resetAfterSeconds
     }
 
+    // Relative durations must already be anchored to the reading's capture time.
+    func hasExpired(at now: Date) -> Bool {
+        if let resetDate { return resetDate.timeIntervalSince1970 <= now.timeIntervalSince1970 }
+        return resetAfterSeconds == 0
+    }
+
     func anchored(capturedAt: Date, now: Date = Date()) -> UsageLimitWindow {
         let remaining: Int?
         if let resetDate {

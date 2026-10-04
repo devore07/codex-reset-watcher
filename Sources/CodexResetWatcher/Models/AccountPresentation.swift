@@ -61,6 +61,8 @@ struct AccountDetailState: Identifiable {
     let canRefresh: Bool
     let canForget: Bool
     let refreshActionTitle: String
+    var usageCapturedAt: Date? = nil
+    var usageHasError: Bool = false
 
     var id: String {
         selection.id
