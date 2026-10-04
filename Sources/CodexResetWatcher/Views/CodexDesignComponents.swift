@@ -124,7 +124,6 @@ struct CodexSegmentedPicker<Selection: Hashable, Content: View>: View {
         .labelsHidden()
         .accessibilityLabel(label)
         .pickerStyle(.segmented)
-        .background(CodexPalette.controlBackground, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
     }
 }
 

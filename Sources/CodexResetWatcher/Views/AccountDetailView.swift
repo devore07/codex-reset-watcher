@@ -36,7 +36,6 @@ struct AccountDetailView: View {
             footer
         }
         .padding(CodexStyle.Spacing.desktopPage)
-        .background(CodexPalette.appBackground)
     }
 
     private var codexColumn: some View {

@@ -10,9 +10,9 @@ Codex usage limits and reset credits. Keep changes scoped to that product.
 - Public GitHub repo: `https://github.com/jordan-edai/codex-reset-watcher`
 - Canonical local path: `/Users/everydayai/Documents/!Codex Projects/Rate Refresher Project`
 - Compatibility path: `/Users/everydayai/Documents/Rate Refresher Project`
-- App bundle target version: `v0.9.0`; verify GitHub for publication status.
+- App bundle target version: `v0.10.0`; verify GitHub for publication status.
 - Check `git log --oneline --decorate -5` for the current `main` commit; this
-  note tracks the repo state through the `v0.8.0` compact and detailed menu dropdown.
+  note tracks the repo state through the `v0.10.0` Liquid Glass appearance update.
 - App bundle version is set in `script/build_and_run.sh`.
 
 ## Product Decisions
@@ -52,6 +52,11 @@ Codex usage limits and reset credits. Keep changes scoped to that product.
 - Visual styling should flow through `CodexPalette` and `CodexStyle`. Prefer
   shared spacing, radius, type, row, and panel tokens over one-off view-local
   constants so the menu dropdown and desktop window stay visually aligned.
+- Use `codexWindowSurface()` for translucent window material and
+  `codexButtonStyle(...)` for native Liquid Glass buttons on macOS 26+, with
+  availability fallbacks. Let the menu popover provide its system material;
+  avoid opaque root/picker layers except for accessibility. Usage cards remain
+  solid. Reduce Transparency and Increase Contrast use opaque root backgrounds.
 - Appearance mode is shared by the menu dropdown and desktop window. Keep
   Light/Dark/Auto routed through `CodexAppearanceMode`, SwiftUI
   `preferredColorScheme`, and `NSApp.appearance` so custom palette colors
@@ -190,8 +195,9 @@ Codex usage limits and reset credits. Keep changes scoped to that product.
 - Portable Swift helper/connection tests run with
   `docker build -t codex-reset-watcher:claude-tests .` and
   `docker run --rm codex-reset-watcher:claude-tests`.
-- The native SwiftUI app needs macOS/Xcode and cannot be built in the Linux
+- The native SwiftUI app needs macOS/Xcode 26+ and cannot be built in the Linux
   container. Use the existing native verification commands below for it.
+- CI and release jobs select Xcode 26.3; runtime support still starts at macOS 14.
 - Run `bash script/verify_claude_package.sh` after packaging; it checks both
   helper architectures, signing, private-string patterns, and synthetic command
   forwarding. No test should modify the user's real Claude settings.

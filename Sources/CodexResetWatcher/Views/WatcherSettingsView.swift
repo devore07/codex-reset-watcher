@@ -53,6 +53,9 @@ struct WatcherSettingsView: View {
             }
         }
         .formStyle(.grouped)
+        .scrollContentBackground(.hidden)
+        .codexWindowSurface()
+        .codexButtonStyle()
         .frame(width: 500)
         .fixedSize(horizontal: false, vertical: true)
         .onAppear { loginStatus = SMAppService.mainApp.status }

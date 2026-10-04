@@ -17,33 +17,41 @@ https://github.com/devore07/codex-reset-watcher
 Current release:
 
 ```text
-v0.7.3 (verified on 2026-10-03; v0.9.0 release candidate below)
+v0.9.0 (verified on 2026-10-03; v0.10.0 release candidate below)
 ```
 
 Latest tracked release state:
 
 ```text
-v0.9.0 candidate: freshness, Compact timing, quiet notifications, launch at login
+v0.10.0 candidate: native Liquid Glass buttons and translucent window surfaces
 ```
 
 Latest local release branch:
 
 ```text
-codex/freshness-alerts-login
+codex/liquid-glass
 ```
 
-The candidate includes the previously pending Compact/Detailed dropdown work.
-Both providers mark old/failed menu-title readings; Compact shows reset timing
-and actual usage receipt times. Native Settings adds opt-in local notifications
-and launch at login, both off by default. Alert deduplication stores only hashed
-event keys and expiry timestamps. Claude source selection is unchanged.
+v0.9.0 shipped the selected freshness, Compact timing, quiet notification and
+launch-at-login improvements through fork PR #10. Both optional OS features
+remain off by default. Actual notification delivery and login/reboot remain
+manual checks.
 
-145 native tests and 15 portable Docker tests pass. Universal packaging, helper
-verification and app launch pass; both Mach-O slices retain macOS 14 minimum
-deployment despite the local SDK's Intel deprecation warning. Changed Swift code
-has no new lint diagnostics. Synthetic menu layouts fit in Light/Dark/Auto;
-the native Settings window and default-off controls were inspected. OS alert
-delivery and a real login/reboot are not exercised by the isolated tests.
+v0.10.0 adopts native Liquid Glass buttons on macOS 26+, a translucent window
+base on macOS 15+, and shared rounded data cards. Usage cards stay opaque;
+Reduce Transparency and Increase Contrast restore opaque root backgrounds.
+Older systems keep native bordered controls and macOS 14 remains supported.
+CI and releases select Xcode 26.3. Provider state, credentials, source selection,
+menu sizing and the fixed desktop sidebar are unchanged.
+
+145 native tests and 15 portable Docker tests pass. Compact and Detailed menu
+geometry passes in Auto/Light/Dark and high-contrast appearance fixtures. The
+packaged desktop and Settings were inspected; system materials use a subtle
+thick variant to keep Settings readable. Universal packaging, helper/privacy
+checks, ZIP integrity and app launch pass. No new lint diagnostics were added;
+three existing formatting warnings remain in CodexDesignComponents.swift.
+Native status-item pixels, real Reduce Transparency switching, notification
+delivery and login/reboot remain manual checks. Fork release workflow pending.
 
 The sections below preserve the inherited upstream history through v0.4.4;
 their release/PR/workspace references are historical. Current behavior is in

@@ -118,7 +118,6 @@ struct ClaudeDetailView: View {
             }
             .padding(CodexStyle.Spacing.desktopPage)
         }
-        .background(CodexPalette.appBackground)
         .onAppear { store.reload() }
     }
 
@@ -153,7 +152,7 @@ struct ClaudeDetailView: View {
                     Button("Disconnect Claude") { store.disconnect() }
                 } else {
                     Button("Connect Claude") { Task { await store.connect() } }
-                        .buttonStyle(.borderedProminent)
+                        .codexButtonStyle(prominent: true)
                         .disabled(store.isConnecting)
                 }
                 if store.isConnecting { ProgressView().controlSize(.small) }

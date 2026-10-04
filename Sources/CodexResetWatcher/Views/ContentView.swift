@@ -9,7 +9,6 @@ struct ContentView: View {
         HStack(spacing: 0) {
             AccountSidebarView(store: store, claudeStore: claudeStore)
                 .frame(width: CodexStyle.Size.sidebarWidth)
-                .background(CodexPalette.sidebarBackground)
 
             Divider()
 
@@ -43,5 +42,7 @@ struct ContentView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .codexWindowSurface()
+        .codexButtonStyle()
     }
 }

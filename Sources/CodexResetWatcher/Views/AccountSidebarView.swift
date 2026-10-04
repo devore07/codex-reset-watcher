@@ -61,7 +61,6 @@ struct AccountSidebarView: View {
             }
             .listStyle(.sidebar)
             .scrollContentBackground(.hidden)
-            .background(CodexPalette.sidebarBackground)
 
             if !store.cachedSnapshots.isEmpty {
                 Divider()
