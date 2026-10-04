@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-10-03
+Last updated: 2026-10-04
 
 ## Summary
 
@@ -17,19 +17,19 @@ https://github.com/devore07/codex-reset-watcher
 Current release:
 
 ```text
-v0.9.0 (verified on 2026-10-03; v0.10.0 release candidate below)
+v0.10.0 (published 2026-10-04; release workflow succeeded)
 ```
 
 Latest tracked release state:
 
 ```text
-v0.10.0 candidate: native Liquid Glass buttons and translucent window surfaces
+v0.10.0 shipped: native Liquid Glass buttons and translucent window surfaces
 ```
 
 Latest local release branch:
 
 ```text
-codex/liquid-glass
+codex/liquid-glass (merged via PR #11 on 2026-10-04)
 ```
 
 v0.9.0 shipped the selected freshness, Compact timing, quiet notification and
@@ -51,7 +51,7 @@ thick variant to keep Settings readable. Universal packaging, helper/privacy
 checks, ZIP integrity and app launch pass. No new lint diagnostics were added;
 three existing formatting warnings remain in CodexDesignComponents.swift.
 Native status-item pixels, real Reduce Transparency switching, notification
-delivery and login/reboot remain manual checks. Fork release workflow pending.
+delivery and login/reboot remain manual checks. The v0.10.0 fork release workflow completed successfully on 2026-10-04 and published the release zip.
 
 The sections below preserve the inherited upstream history through v0.4.4;
 their release/PR/workspace references are historical. Current behavior is in
@@ -125,6 +125,14 @@ README, CHANGELOG and AGENTS; the summary above supersedes historical status.
 - `v0.4.4`: restores the weekly reset weekday to the menu bar title while
   preserving the temporary weekly-only UI and documenting the future 5-hour
   restoration path.
+- `v0.9.0`: adds compact reset timing, freshness indicators, optional local
+  alerts, and launch-at-login settings; notifications and login/reboot behavior
+  still require manual verification.
+- `v0.10.0` (published 2026-10-04): adopts Liquid Glass controls and translucent
+  window surfaces, with the release zip published after the tag-triggered
+  workflow completed successfully. Native status-item pixel QA, real Reduce
+  Transparency switching, notification delivery, and login/reboot remain
+  manual checks.
 
 ## Historical Upstream GitHub State (2026-07-12)
 
