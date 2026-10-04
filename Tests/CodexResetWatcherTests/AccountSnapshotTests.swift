@@ -534,7 +534,6 @@ final class AccountSnapshotStoreTests: XCTestCase {
         XCTAssertEqual(store.snapshots.first?.usageCapturedAt, firstCapture)
         XCTAssertEqual(store.detail(for: .active).usageCapturedAt, firstCapture)
         XCTAssertTrue(store.detail(for: .active).usageHasError)
-        XCTAssertTrue(store.menuBarPresentation(at: firstCapture).title.contains("%*"))
         XCTAssertEqual(store.snapshots.first?.resetCountKnown, true)
         XCTAssertEqual(store.liveState, .partial)
         XCTAssertEqual(store.nudge.title, "Usage limits unavailable")

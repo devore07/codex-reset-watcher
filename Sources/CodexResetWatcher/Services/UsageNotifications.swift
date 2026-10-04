@@ -50,18 +50,18 @@ final class UsageNotifications: ObservableObject {
     @Published private(set) var message: String?
     @Published private(set) var requestingPermission = false
     private let defaults: UserDefaults
-    private let authorized: () async -> Bool
-    private let deliver: (UsageAlert) async throws -> Void
+    private let authorized: @MainActor () async -> Bool
+    private let deliver: @MainActor (UsageAlert) async throws -> Void
     private var checking = false
     private var sent: [String: Double]
 
     init(
         defaults: UserDefaults = .standard,
-        authorized: @escaping () async -> Bool = {
+        authorized: @escaping @MainActor () async -> Bool = {
             let settings = await UNUserNotificationCenter.current().notificationSettings()
             return settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional
         },
-        deliver: @escaping (UsageAlert) async throws -> Void = { alert in
+        deliver: @escaping @MainActor (UsageAlert) async throws -> Void = { alert in
             let content = UNMutableNotificationContent()
             content.title = alert.title
             content.body = alert.body
