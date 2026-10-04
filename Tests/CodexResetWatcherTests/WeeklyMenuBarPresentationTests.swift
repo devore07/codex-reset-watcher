@@ -5,6 +5,43 @@ import XCTest
 
 final class WeeklyMenuBarPresentationTests: XCTestCase {
     @MainActor
+    func testCodexFreshFailedOldAndExpiredReadings() {
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        func presentation(age: Double = 0, error: Bool = false, reset: Double? = nil) -> WeeklyMenuBarPresentation {
+            let window = UsageLimitDisplay(
+                id: "weekly", kind: .weekly, title: "Weekly limit",
+                window: UsageLimitWindow(usedPercent: 25, limitWindowSeconds: 604_800, resetAfterSeconds: nil, resetAt: reset),
+                limitReached: false)
+            return .codex(windows: [window], capturedAt: now.addingTimeInterval(-age), hasError: error, now: now)
+        }
+        XCTAssertEqual(presentation().title, "75% | week")
+        XCTAssertEqual(presentation(age: 299).title, "75% | week")
+        for value in [presentation(age: 300), presentation(error: true)] {
+            XCTAssertEqual(value.title, "75%* | week")
+            XCTAssertTrue(value.help.contains("Last updated"))
+            XCTAssertTrue(value.help.contains("Last reported"))
+        }
+        XCTAssertEqual(presentation(reset: now.timeIntervalSince1970).title, "--% | updating")
+        XCTAssertEqual(presentation(error: true, reset: now.timeIntervalSince1970 - 1).title, "--% | updating")
+        XCTAssertTrue(presentation(reset: now.timeIntervalSince1970 + 3600).title.hasPrefix("75% | "))
+        XCTAssertEqual(WeeklyMenuBarPresentation.codex(windows: [], capturedAt: now, hasError: false, now: now).title, "--% | week")
+    }
+
+    @MainActor
+    func testCompactResetTimingCountsDownAndPreservesMissingAndPassedStates() {
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        let window = UsageLimitWindow(usedPercent: 20, limitWindowSeconds: 18_000, resetAfterSeconds: 8100, resetAt: nil)
+        let later = now.addingTimeInterval(3600)
+        let anchored = window.anchored(capturedAt: now, now: later)
+        XCTAssertEqual(DateFormatting.usageReset(nil, seconds: anchored.resetAfterSeconds, now: later), "Resets in 1h 15m")
+        XCTAssertEqual(DateFormatting.usageReset(now.addingTimeInterval(8100), now: now), "Resets in 2h 15m")
+        XCTAssertEqual(DateFormatting.usageReset(nil, now: now), "Reset time unavailable")
+        XCTAssertEqual(DateFormatting.usageReset(now, now: now), "Awaiting updated usage")
+        XCTAssertTrue(window.anchored(capturedAt: now, now: now.addingTimeInterval(8100)).hasExpired(at: now.addingTimeInterval(8100)))
+        XCTAssertFalse(anchored.hasExpired(at: later))
+    }
+
+    @MainActor
     func testWeeklyPercentageAndResetStayIndependentOfOtherWindows() {
         let now = Date(timeIntervalSince1970: 1_800_000_000)
         let reset = now.addingTimeInterval(86_400)

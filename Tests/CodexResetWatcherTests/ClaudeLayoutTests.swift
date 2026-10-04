@@ -63,9 +63,25 @@ final class ClaudeLayoutTests: XCTestCase {
         claude.reload(at: now)
         XCTAssertEqual(claude.report?.fableWeekly.count, 1)
         for mode in CodexAppearanceMode.allCases {
+            let compact = MenuBarStatusView(
+                store: codex, claudeStore: claude, mainWindowController: MainWindowController(),
+                appearanceModeRawValue: .constant(mode.rawValue), menuViewModeRawValue: .constant("compact")
+            ).preferredColorScheme(mode.colorScheme)
+            let compactSize = NSHostingView(rootView: compact).fittingSize
+            XCTAssertEqual(compactSize.width, CodexStyle.Size.compactMenuWidth, accuracy: 1)
+            XCTAssertLessThanOrEqual(compactSize.height, 560, "Compact menu including reset timing must hug its content")
+            if let output = ProcessInfo.processInfo.environment["CODEX_UI_TEST_OUTPUT"] {
+                let renderer = ImageRenderer(content: compact)
+                renderer.scale = 2
+                if let image = renderer.nsImage, let tiff = image.tiffRepresentation,
+                    let data = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:])
+                {
+                    try data.write(to: URL(fileURLWithPath: output).appendingPathComponent("compact-menu-\(mode.rawValue).png"))
+                }
+            }
             let view = MenuBarStatusView(
                 store: codex, claudeStore: claude, mainWindowController: MainWindowController(),
-                appearanceModeRawValue: .constant(mode.rawValue)
+                appearanceModeRawValue: .constant(mode.rawValue), menuViewModeRawValue: .constant("detailed")
             )
             .preferredColorScheme(mode.colorScheme)
             let hosting = NSHostingView(rootView: view)

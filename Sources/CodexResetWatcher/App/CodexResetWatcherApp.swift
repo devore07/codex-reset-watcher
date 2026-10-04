@@ -5,9 +5,11 @@ import SwiftUI
 struct CodexResetWatcherApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @AppStorage("appearanceMode") private var appearanceModeRawValue = CodexAppearanceMode.auto.rawValue
+    @AppStorage("menuViewMode") private var menuViewModeRawValue = MenuViewMode.compact.rawValue
     @StateObject private var store = ResetCreditsStore()
     @StateObject private var claudeStore = ClaudeUsageStore()
     @StateObject private var mainWindowController = MainWindowController()
+    @StateObject private var notifications = UsageNotifications()
 
     private var appearanceMode: CodexAppearanceMode {
         CodexAppearanceMode(rawValue: appearanceModeRawValue) ?? .auto
@@ -61,7 +63,8 @@ struct CodexResetWatcherApp: App {
                 store: store,
                 claudeStore: claudeStore,
                 mainWindowController: mainWindowController,
-                appearanceModeRawValue: $appearanceModeRawValue
+                appearanceModeRawValue: $appearanceModeRawValue,
+                menuViewModeRawValue: $menuViewModeRawValue
             )
                 .preferredColorScheme(appearanceMode.colorScheme)
                 .onAppear {
@@ -78,8 +81,16 @@ struct CodexResetWatcherApp: App {
                 }
         } label: {
             WeeklyMenuBarLabel(store: store, claudeStore: claudeStore)
+                .onReceive(claudeStore.$now) { now in
+                    Task { await notifications.check(codex: store, claude: claudeStore, now: now) }
+                }
         }
         .menuBarExtraStyle(.window)
+
+        Settings {
+            WatcherSettingsView(notifications: notifications)
+                .preferredColorScheme(appearanceMode.colorScheme)
+        }
     }
 
     private func applyAppearanceMode() {

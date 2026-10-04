@@ -2,6 +2,14 @@
 
 Codex Reset Watcher is read-only.
 
+Optional local notifications are off by default. Enabling them requests macOS
+permission; no push service or additional network request is used. Notifications
+contain provider names and usage/expiry warnings, never account labels or IDs.
+Preferences store notification choices and SHA-256 event keys with deduplication
+expiry timestamps so warnings do not repeat after restart. Expired keys are
+pruned while notification checks run; no raw credit IDs or credentials are saved.
+Launch at login is an explicit, optional macOS Login Items registration.
+
 The app reads your existing Codex Desktop login from:
 
 ```text

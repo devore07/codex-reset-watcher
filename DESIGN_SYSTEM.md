@@ -47,6 +47,14 @@ the visual priority.
 - The menu dropdown may be tall enough to breathe. Do not compress every row to
   keep all possible content above the fold; if the real popover feels jammed,
   prefer a wider menu and comfortable row heights before shrinking type.
+- The menu-bar dropdown has a saved Compact / Detailed selector at its top.
+  Compact is the default, 600 points wide, with remaining provider usage,
+  reset countdowns and last-updated labels for each provider,
+  banked Codex reset counts and up to four expiry dates. Further dates use an
+  explicit Open action. Keep old, unavailable, missing and expired states visible.
+  Its footer retains appearance, Refresh, Settings, Open and Quit. Detailed uses the existing
+  provider rows, usage reset timing, account overview and advice at the wider size.
+  Changing this selector must not resize or change the desktop window.
 - The menu dropdown must hug its intrinsic content height. Never add a
   screen-sized frame, forced viewport, `ScrollView`, or `ViewThatFits` layer
   that creates empty space above or below its visible rows.
@@ -88,7 +96,7 @@ the visual priority.
 - Keep the menu bar weekly, alternating Codex and connected Claude every 10
   seconds. Use the OpenAI knot/Claude starburst template image and service name with the percentage
   and reset weekday. Missing timing uses `week`; missing weekly data uses `--%`.
-  Claude old/failed readings carry `*` with an explanatory tooltip; passed resets
+  Both providers' old/failed readings carry `*` with an explanatory tooltip; passed resets
   show `--% | updating`. Keep reset counts and account labels out of the title.
 - Preserve the former 5-hour design in `MENU_BAR_DISPLAY_PLAN.md`; restore its
   selector and time cue only after the endpoint reliably returns that window.
@@ -96,6 +104,9 @@ the visual priority.
   copy before shrinking fonts.
 - Prefer `LimitMeterView` for every usage/capacity bar so color thresholds,
   clamping, and accessibility labels stay consistent.
+- Settings contains native launch-at-login and opt-in notification controls.
+  Keep these out of the appearance-only Display settings section. Surface denied
+  notification permission and login approval/errors without silently claiming success.
 - Desktop reset rows must keep label/detail text and expiry dates in separate
   columns. Do not put the label and large expiry date in one flexible inline
   text row; it will overlap in the default utility-window width.

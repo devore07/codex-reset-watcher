@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-12
+Last updated: 2026-10-03
 
 ## Summary
 
@@ -11,31 +11,43 @@ read-only, and local-first.
 Repository:
 
 ```text
-https://github.com/jordan-edai/codex-reset-watcher
+https://github.com/devore07/codex-reset-watcher
 ```
 
 Current release:
 
 ```text
-v0.4.4
+v0.7.3 (verified on 2026-10-03; v0.9.0 release candidate below)
 ```
 
 Latest tracked release state:
 
 ```text
-v0.4.4 weekly percentage and reset-day menu title
+v0.9.0 candidate: freshness, Compact timing, quiet notifications, launch at login
 ```
 
 Latest local release branch:
 
 ```text
-codex/v0.4.4-weekly-reset-day
+codex/freshness-alerts-login
 ```
 
-The v0.4.4 fix keeps the title weekly-only while restoring the weekly reset
-weekday, such as `57% | Sunday`. The 5-hour selector remains dormant until Codex
-returns that window again; its restoration design is in
-`MENU_BAR_DISPLAY_PLAN.md`.
+The candidate includes the previously pending Compact/Detailed dropdown work.
+Both providers mark old/failed menu-title readings; Compact shows reset timing
+and actual usage receipt times. Native Settings adds opt-in local notifications
+and launch at login, both off by default. Alert deduplication stores only hashed
+event keys and expiry timestamps. Claude source selection is unchanged.
+
+145 native tests and 15 portable Docker tests pass. Universal packaging, helper
+verification and app launch pass; both Mach-O slices retain macOS 14 minimum
+deployment despite the local SDK's Intel deprecation warning. Changed Swift code
+has no new lint diagnostics. Synthetic menu layouts fit in Light/Dark/Auto;
+the native Settings window and default-off controls were inspected. OS alert
+delivery and a real login/reboot are not exercised by the isolated tests.
+
+The sections below preserve the inherited upstream history through v0.4.4;
+their release/PR/workspace references are historical. Current behavior is in
+README, CHANGELOG and AGENTS; the summary above supersedes historical status.
 
 ## What Is Shipped
 
@@ -106,7 +118,7 @@ returns that window again; its restoration design is in
   preserving the temporary weekly-only UI and documenting the future 5-hour
   restoration path.
 
-## Current GitHub State
+## Historical Upstream GitHub State (2026-07-12)
 
 - Repo is public.
 - Repo description: `Local-first macOS menu bar app for Codex usage limits and reset credits.`
@@ -259,7 +271,7 @@ file under Application Support.
   claim about a specific two-real-account login flow should be manually
   rechecked by signing into the second Codex Desktop account on that machine.
 
-## Local Workspace Notes
+## Historical Upstream Workspace Notes
 
 The canonical local project path is:
 
@@ -293,7 +305,7 @@ unless the user explicitly asks.
   shape changes.
 - Add optional user nicknames for cached accounts.
 
-## Latest Local Verification
+## Historical v0.4.4 Verification
 
 The `v0.4.4` release candidate was locally verified on 2026-07-12 with:
 

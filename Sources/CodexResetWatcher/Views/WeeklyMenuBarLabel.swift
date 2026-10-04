@@ -7,13 +7,14 @@ struct WeeklyMenuBarLabel: View {
 
     private var showingClaude: Bool { claudeTurn && claudeStore.connected }
     private var claude: WeeklyMenuBarPresentation {
-        .claude(report: claudeStore.report, hasError: claudeStore.errorMessage != nil, now: claudeStore.now)
+        .claude(
+            report: claudeStore.report, hasError: claudeStore.errorMessage != nil || claudeStore.configurationChanged,
+            now: claudeStore.now)
     }
-    private var title: String { showingClaude ? claude.title : "Codex \(store.menuBarTitle)" }
+    private var codex: WeeklyMenuBarPresentation { store.menuBarPresentation(at: claudeStore.now) }
+    private var title: String { showingClaude ? claude.title : "Codex \(codex.title)" }
     private var help: String {
-        let reset = store.usageWindows.first(where: { $0.kind == .weekly })?.window.resetDate
-        let codexTiming = reset.map { "Resets \(DateFormatting.weekdayCompact($0))." } ?? "Reset time unavailable."
-        let reading = showingClaude ? claude.help : "Codex weekly remaining: \(store.menuBarTitle). \(codexTiming)"
+        let reading = showingClaude ? claude.help : codex.help
         return reading + (claudeStore.connected ? " Alternates providers every 10 seconds." : "")
     }
 

@@ -10,9 +10,9 @@ Codex usage limits and reset credits. Keep changes scoped to that product.
 - Public GitHub repo: `https://github.com/jordan-edai/codex-reset-watcher`
 - Canonical local path: `/Users/everydayai/Documents/!Codex Projects/Rate Refresher Project`
 - Compatibility path: `/Users/everydayai/Documents/Rate Refresher Project`
-- Release version: `v0.7.3`
+- App bundle target version: `v0.9.0`; verify GitHub for publication status.
 - Check `git log --oneline --decorate -5` for the current `main` commit; this
-  note tracks the repo state through the `v0.7.3` rotating weekly menu-bar display.
+  note tracks the repo state through the `v0.8.0` compact and detailed menu dropdown.
 - App bundle version is set in `script/build_and_run.sh`.
 
 ## Product Decisions
@@ -31,7 +31,7 @@ Codex usage limits and reset credits. Keep changes scoped to that product.
   using OpenAI knot/Claude starburst template images, service names, percentages
   and reset weekdays.
   Stay on Codex when Claude is disconnected. Keep rotation independent of refresh.
-  Claude old/failed readings append `*`; passed resets show `--% | updating`.
+  Both providers' old/failed readings append `*`; passed resets show `--% | updating`.
   Never substitute banked reset counts, account labels, five-hour or Fable data.
 - There is temporarily no menu-title metric selector while Codex does not return
   the former 5-hour window. If weekly reset timing is missing, use `week`; if
@@ -101,6 +101,18 @@ Codex usage limits and reset credits. Keep changes scoped to that product.
 - Menu cached-snapshot rows should focus the existing main window and update the
   shared account selection. Do not call `openWindow(id: "main")` directly from
   those rows, because `WindowGroup` can create duplicate main windows.
+- The menu-bar dropdown offers a saved Compact / Detailed switch at the top.
+  Compact is the default 600-point popover with remaining usage, reset countdowns,
+  last-updated labels and banked Codex reset counts/expirations; preserve unknown,
+  blocked, old and expired states.
+  Show at most four reset dates and an explicit action for more. Both layouts hug
+  intrinsic content height without ScrollView. The desktop keeps its full layout.
+- Settings (dropdown gear/Command-comma) contains opt-in local notifications and
+  native launch at login. Never request notification permission or register a
+  login item automatically. Alert only on fresh known overall usage or fresh
+  upcoming credit expirations. Persist hashed event keys/expiry times only for
+  deduplication; do not persist raw account or credit IDs. Native tests inject
+  notification delivery and use isolated preferences, without changing OS permissions.
 - The active desktop Dashboard shows Codex and Claude side by side; keep provider
   errors/loading independent and reset credits/advice under Codex. Cached snapshots
   remain separate from the live dashboard. Keep one shared Refresh and appearance

@@ -8,6 +8,7 @@ struct MenuBarStatusView: View {
     @ObservedObject var claudeStore: ClaudeUsageStore
     @ObservedObject var mainWindowController: MainWindowController
     @Binding var appearanceModeRawValue: String
+    @Binding var menuViewModeRawValue: String
     @Environment(\.openWindow) private var openWindow
 
     private var appearanceModeSelection: Binding<String> {
@@ -20,20 +21,47 @@ struct MenuBarStatusView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 9) {
-            header
+            HStack {
+                Text("Usage limits").font(CodexStyle.Typography.menuTitle)
+                Spacer()
+                CodexSegmentedPicker("Menu view", selection: $menuViewModeRawValue) {
+                    ForEach(MenuViewMode.allCases) { mode in
+                        Text(mode.title).tag(mode.rawValue)
+                    }
+                }
+                .frame(width: 190)
+            }
+
+            if !isCompact { header }
 
             Divider()
 
-            dynamicContent
-                .fixedSize(horizontal: false, vertical: true)
+            Group {
+                if isCompact {
+                    CompactUsageSummary(
+                        detail: store.detail(for: .active), claudeStore: claudeStore,
+                        onShowAllResets: { showMainWindow() })
+                } else {
+                    dynamicContent
+                }
+            }
+            .fixedSize(horizontal: false, vertical: true)
 
             Divider()
 
             footer
         }
         .padding(CodexStyle.Spacing.menuPadding)
-        .frame(width: claudeStore.connected ? CodexStyle.Size.multiProviderMenuWidth : CodexStyle.Size.menuWidth)
+        .frame(
+            width: isCompact
+                ? CodexStyle.Size.compactMenuWidth
+                : (claudeStore.connected ? CodexStyle.Size.multiProviderMenuWidth : CodexStyle.Size.menuWidth)
+        )
         .background(CodexPalette.menuPopoverBackground)
+    }
+
+    private var isCompact: Bool {
+        (MenuViewMode(rawValue: menuViewModeRawValue) ?? .compact) == .compact
     }
 
     private var dynamicContent: some View {
@@ -58,6 +86,14 @@ struct MenuBarStatusView: View {
 
     private var footer: some View {
         HStack {
+            if isCompact {
+                CodexSegmentedPicker("Appearance", selection: appearanceModeSelection) {
+                    ForEach(CodexAppearanceMode.allCases) { mode in
+                        Text(mode.title).tag(mode.rawValue)
+                    }
+                }
+                .frame(width: CodexStyle.Size.menuControlWidth)
+            }
             Button {
                 claudeStore.requestRefresh()
                 Task {
@@ -69,6 +105,12 @@ struct MenuBarStatusView: View {
             .disabled(store.isRefreshing)
 
             Spacer()
+
+            SettingsLink {
+                Image(systemName: "gearshape")
+            }
+            .help("Settings")
+            .accessibilityLabel("Settings")
 
             Button("Open") {
                 showMainWindow()
@@ -117,10 +159,12 @@ struct MenuBarStatusView: View {
 
     private var claudeLimitsGroup: some View {
         VStack(alignment: .leading, spacing: CodexStyle.Spacing.tight) {
-            ClaudeUsageRows(store: claudeStore, openDetails: {
-                claudeStore.showingClaude = true
-                showMainWindow()
-            })
+            ClaudeUsageRows(
+                store: claudeStore,
+                openDetails: {
+                    claudeStore.showingClaude = true
+                    showMainWindow()
+                })
             if claudeStore.report == nil {
                 Button(claudeStore.connected ? "Claude details" : "Connect Claude") {
                     claudeStore.showingClaude = true
@@ -139,39 +183,25 @@ struct MenuBarStatusView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .center, spacing: 12) {
+        HStack(spacing: CodexStyle.Spacing.rowGap) {
             CodexArtworkThumbnail(compact: true)
                 .frame(width: CodexStyle.Size.menuArtworkWidth, height: CodexStyle.Size.menuArtworkHeight)
-
             VStack(alignment: .leading, spacing: 3) {
-                Text("Usage limits")
-                    .font(CodexStyle.Typography.menuTitle)
-                    .foregroundStyle(CodexPalette.primaryText)
-                Text(DateFormatting.checked(store.lastChecked))
-                    .font(CodexStyle.Typography.menuRowMeta)
-                    .foregroundStyle(CodexPalette.secondaryText)
                 Text("Codex: \(store.accountDisplayLabel)")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(CodexPalette.secondaryText)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-            }
-
-            Spacer(minLength: 10)
-
-            VStack(alignment: .trailing, spacing: 2) {
-                Text(menuResetCountValue)
-                    .font(.system(size: 27, weight: .semibold))
-                    .monospacedDigit()
-                    .foregroundStyle(CodexPalette.primaryText)
-                Text("Codex · \(menuResetCountLabel)")
                     .font(CodexStyle.Typography.menuRowMeta)
-                    .foregroundStyle(CodexPalette.secondaryText)
-                    .lineLimit(1)
-                if store.isRefreshing {
-                    ProgressView()
-                        .controlSize(.small)
-                }
+                    .lineLimit(1).truncationMode(.middle)
+                Text(
+                    DateFormatting.usageUpdated(
+                        store.usageCapturedAt,
+                        old: UsageFreshness.isOld(
+                            capturedAt: store.usageCapturedAt, hasError: store.usageErrorMessage != nil, now: claudeStore.now))
+                )
+                .font(CodexStyle.Typography.menuRowMeta)
+                .foregroundStyle(CodexPalette.secondaryText)
+            }
+            Spacer()
+            if store.isRefreshing {
+                ProgressView().controlSize(.small)
             }
         }
     }
@@ -212,7 +242,7 @@ struct MenuBarStatusView: View {
                 size: 24,
                 symbolSize: CodexStyle.Icon.menu
             )
-                .frame(width: CodexStyle.Size.menuIconColumn)
+            .frame(width: CodexStyle.Size.menuIconColumn)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(window.title)
@@ -246,7 +276,10 @@ struct MenuBarStatusView: View {
         VStack(alignment: .leading, spacing: 7) {
             menuSectionHeader(MenuBarSection.bankedResetsExpiration.rawValue, detail: "Codex · \(resetCountDetail)")
 
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: CodexStyle.Spacing.section), count: claudeStore.connected ? 2 : 1), spacing: 7) {
+            LazyVGrid(
+                columns: Array(repeating: GridItem(.flexible(), spacing: CodexStyle.Spacing.section), count: claudeStore.connected ? 2 : 1),
+                spacing: 7
+            ) {
                 ForEach(visibleResetCredits, id: \.element.id) { index, credit in
                     resetExpiryRow(index: index, credit: credit)
                 }
@@ -467,6 +500,11 @@ struct MenuBarStatusView: View {
     }
 
     private var currentLimitsDetail: String {
+        if store.usage != nil,
+            UsageFreshness.isOld(capturedAt: store.usageCapturedAt, hasError: store.usageErrorMessage != nil, now: claudeStore.now)
+        {
+            return "Old reading"
+        }
         switch store.liveState {
         case .loading:
             return "Checking"
@@ -483,35 +521,13 @@ struct MenuBarStatusView: View {
         }
     }
 
-    private var menuResetCountValue: String {
-        switch store.resetCountState {
-        case .loading:
-            return "..."
-        case .unavailable:
-            return "-"
-        case let .known(count):
-            return "\(count)"
-        }
-    }
-
-    private var menuResetCountLabel: String {
-        switch store.resetCountState {
-        case .loading:
-            return "checking reset credits"
-        case .unavailable:
-            return "reset count unavailable"
-        case let .known(count):
-            return count == 1 ? "reset credit available" : "reset credits available"
-        }
-    }
-
     private var resetCountDetail: String {
         switch store.resetCountState {
         case .loading:
             return "Checking"
         case .unavailable:
             return "Count unavailable"
-        case let .known(count):
+        case .known(let count):
             return "\(count) available"
         }
     }
