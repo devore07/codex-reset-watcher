@@ -58,8 +58,13 @@ final class UsageNotifications: ObservableObject {
     init(
         defaults: UserDefaults = .standard,
         authorized: @escaping @MainActor () async -> Bool = {
-            let settings = await UNUserNotificationCenter.current().notificationSettings()
-            return settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional
+            // Older SDKs do not mark UNNotificationSettings Sendable; only move the derived Bool across actors.
+            await withCheckedContinuation { continuation in
+                UNUserNotificationCenter.current().getNotificationSettings { settings in
+                    continuation.resume(
+                        returning: settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional)
+                }
+            }
         },
         deliver: @escaping @MainActor (UsageAlert) async throws -> Void = { alert in
             let content = UNMutableNotificationContent()
