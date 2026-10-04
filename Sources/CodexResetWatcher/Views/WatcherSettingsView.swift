@@ -14,7 +14,7 @@ struct WatcherSettingsView: View {
                     "Launch at login",
                     isOn: Binding(
                         get: { loginStatus == .enabled || loginStatus == .requiresApproval },
-                        set: setLaunchAtLogin))
+                        set: { value in setLaunchAtLogin(value) }))
                 if loginStatus == .requiresApproval {
                     Text("Approval required in macOS Login Items.")
                     Button("Open Login Items") { SMAppService.openSystemSettingsLoginItems() }
