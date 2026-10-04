@@ -20,12 +20,21 @@ the visual priority.
 
 ## Rules
 
-- Keep card and row corners at 8px or less.
-- Keep root surfaces high-contrast and adaptive to Light, Dark, and Auto modes.
+- Use shared 16-point panel and 12-point row corners.
+- Use the system's translucent window material and native Liquid Glass buttons
+  on supported macOS versions. The window material applies from macOS 15;
+  glass buttons require macOS 26. macOS 14 keeps opaque adaptive surfaces and
+  earlier systems use bordered buttons. Build with Xcode 26 or newer.
+- Keep root surfaces readable and adaptive to Light, Dark, and Auto modes.
   Custom palette colors must work when `NSApp.appearance` is forced as well as
   when macOS follows the system appearance.
-- Keep normal light mode warm and quiet: app background `#f5f4f2`, white cards,
-  black text, and hairline borders. Keep dark mode dark gray, not pure black.
+- Keep white data cards, dark text, and hairline borders in Light mode; use dark
+  gray cards in Dark mode. Usage cards stay opaque for predictable contrast.
+  Reduce Transparency or Increase Contrast replaces the window/menu material
+  with opaque adaptive backgrounds. System controls retain native accessibility.
+- Route window surfaces and buttons through `codexWindowSurface()` and
+  `codexButtonStyle(...)`. Let the menu popover supply its own system material;
+  do not stack another blur/glass layer behind it or behind native pickers.
 - Keep routine rows and cards light. Do not use smoky gray or dark tinted fills
   for normal, selected, or informational rows.
 - Use one accent color for neutral emphasis. Reserve green, amber, orange, and
@@ -144,6 +153,8 @@ Then open the real macOS menu bar dropdown and check:
 - the nudge detail does not crowd the percentage/date columns
 - cached snapshots do not appear in the menu dropdown
 - light and dark system appearances still have enough contrast
+- Reduce Transparency preserves opaque, readable menu/window backgrounds;
+  Increase Contrast keeps the same information and controls available
 - loading, partial endpoint failure, missing auth, blocked limits, and cached or
   stale snapshots remain understandable without relying on color alone
 - connected Claude with both overall windows, Fable, and four reset cards fits without clipping;

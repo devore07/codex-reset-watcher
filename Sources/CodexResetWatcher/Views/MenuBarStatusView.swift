@@ -10,6 +10,8 @@ struct MenuBarStatusView: View {
     @Binding var appearanceModeRawValue: String
     @Binding var menuViewModeRawValue: String
     @Environment(\.openWindow) private var openWindow
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.colorSchemeContrast) private var contrast
 
     private var appearanceModeSelection: Binding<String> {
         Binding {
@@ -57,7 +59,8 @@ struct MenuBarStatusView: View {
                 ? CodexStyle.Size.compactMenuWidth
                 : (claudeStore.connected ? CodexStyle.Size.multiProviderMenuWidth : CodexStyle.Size.menuWidth)
         )
-        .background(CodexPalette.menuPopoverBackground)
+        .background(reduceTransparency || contrast == .increased ? CodexPalette.menuPopoverBackground : .clear)
+        .codexButtonStyle()
     }
 
     private var isCompact: Bool {

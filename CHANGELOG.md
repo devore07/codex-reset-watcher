@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.10.0
+
+- Adopt a subtly translucent system window background, native Liquid Glass
+  action buttons on macOS 26+, and softer shared card/row corners.
+- Remove opaque sidebar, detail, popover and picker layers that hid the system
+  material. Keep usage cards solid and preserve compact/detailed menu sizing.
+- Honor Reduce Transparency and Increase Contrast with opaque root surfaces;
+  retain macOS 14 support and native bordered buttons on earlier systems.
+- Build CI and release artifacts with Xcode 26.3 so downloads include the modern
+  macOS controls, with layout checks covering increased-contrast appearances.
+
 ## v0.9.0
 
 - Mark old/failed Codex readings consistently with Claude and hide menu-title

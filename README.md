@@ -22,6 +22,10 @@ It reads your existing local Codex Desktop login from `~/.codex/auth.json`, call
 - a natural-height menu dropdown with no forced full-screen viewport
 - Light, Dark, and Auto appearance modes shared by the menu dropdown and main
   window
+- a subtly translucent window base and native Liquid Glass buttons on macOS 26
+  and later, with opaque usage cards for legibility. macOS 15 uses translucent
+  windows and bordered buttons; macOS 14 keeps an opaque background.
+  Reduce Transparency and Increase Contrast restore opaque root surfaces.
 - active account label from the current local Codex login or usage response
 - cached snapshots for previously seen Codex accounts, labeled separately from
   the active account
@@ -205,6 +209,9 @@ If macOS warns that the app is from an unidentified developer, right-click the a
 
 ## Build From Source
 
+Use Xcode 26 or newer (CI and releases select Xcode 26.3). The deployment minimum
+remains macOS 14; modern appearance APIs have runtime fallbacks.
+
 ```bash
 git clone https://github.com/devore07/codex-reset-watcher.git
 cd codex-reset-watcher
@@ -236,7 +243,8 @@ CONFIGURATION=release ./script/build_and_run.sh --verify
 The packaged helper check uses synthetic input and isolated temporary settings.
 It covers command forwarding, exit codes, permissions, concurrent invocations,
 privacy, and disconnect behavior. Native tests also cover stale/partial reports,
-directory observation, provider independence, and menu sizing in all appearances.
+directory observation, provider independence, and menu sizing in all appearances,
+including increased-contrast appearances.
 Real-account validation still requires a signed-in terminal Claude Code session
 and a comparison with its usage display.
 

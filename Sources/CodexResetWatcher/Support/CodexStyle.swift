@@ -2,8 +2,8 @@ import SwiftUI
 
 enum CodexStyle {
     enum Radius {
-        static let panel: CGFloat = 8
-        static let row: CGFloat = 6
+        static let panel: CGFloat = 16
+        static let row: CGFloat = 12
         static let pill: CGFloat = 20
         static let artwork: CGFloat = 7
     }
@@ -102,6 +102,40 @@ enum CodexStyle {
     }
 }
 
+private struct CodexWindowSurfaceModifier: ViewModifier {
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.colorSchemeContrast) private var contrast
+
+    func body(content: Content) -> some View {
+        if #available(macOS 15.0, *) {
+            content.containerBackground(
+                reduceTransparency || contrast == .increased
+                    ? AnyShapeStyle(CodexPalette.appBackground) : AnyShapeStyle(.thickMaterial),
+                for: .window)
+        } else {
+            content.background(CodexPalette.appBackground)
+        }
+    }
+}
+
+private struct CodexButtonStyleModifier: ViewModifier {
+    var prominent: Bool
+
+    func body(content: Content) -> some View {
+        if #available(macOS 26.0, *) {
+            if prominent {
+                content.buttonStyle(.glassProminent)
+            } else {
+                content.buttonStyle(.glass)
+            }
+        } else if prominent {
+            content.buttonStyle(.borderedProminent)
+        } else {
+            content.buttonStyle(.bordered)
+        }
+    }
+}
+
 private struct CodexPanelModifier: ViewModifier {
     let background: Color
     let border: Color
@@ -152,6 +186,14 @@ private struct CodexRowModifier: ViewModifier {
 }
 
 extension View {
+    func codexWindowSurface() -> some View {
+        modifier(CodexWindowSurfaceModifier())
+    }
+
+    func codexButtonStyle(prominent: Bool = false) -> some View {
+        modifier(CodexButtonStyleModifier(prominent: prominent))
+    }
+
     func codexPanel(
         background: Color = CodexPalette.panelBackground,
         border: Color = CodexPalette.border,

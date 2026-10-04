@@ -62,7 +62,18 @@ final class ClaudeLayoutTests: XCTestCase {
         let claude = ClaudeUsageStore(manager: manager)
         claude.reload(at: now)
         XCTAssertEqual(claude.report?.fableWeekly.count, 1)
-        for mode in CodexAppearanceMode.allCases {
+        let app = NSApplication.shared
+        let originalAppearance = app.appearance
+        defer { app.appearance = originalAppearance }
+        let appearances: [(CodexAppearanceMode, NSAppearance.Name?)] = [
+            (.auto, nil), (.light, .aqua), (.dark, .darkAqua),
+            (.light, .accessibilityHighContrastAqua), (.dark, .accessibilityHighContrastDarkAqua)
+        ]
+        for (mode, appearanceName) in appearances {
+            app.appearance = appearanceName.flatMap { NSAppearance(named: $0) }
+            let suffix =
+                appearanceName == .accessibilityHighContrastAqua || appearanceName == .accessibilityHighContrastDarkAqua
+                ? "-contrast" : ""
             let compact = MenuBarStatusView(
                 store: codex, claudeStore: claude, mainWindowController: MainWindowController(),
                 appearanceModeRawValue: .constant(mode.rawValue), menuViewModeRawValue: .constant("compact")
@@ -76,7 +87,7 @@ final class ClaudeLayoutTests: XCTestCase {
                 if let image = renderer.nsImage, let tiff = image.tiffRepresentation,
                     let data = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:])
                 {
-                    try data.write(to: URL(fileURLWithPath: output).appendingPathComponent("compact-menu-\(mode.rawValue).png"))
+                    try data.write(to: URL(fileURLWithPath: output).appendingPathComponent("compact-menu-\(mode.rawValue)\(suffix).png"))
                 }
             }
             let view = MenuBarStatusView(
@@ -94,7 +105,7 @@ final class ClaudeLayoutTests: XCTestCase {
                 if let image = renderer.nsImage, let tiff = image.tiffRepresentation,
                     let data = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:])
                 {
-                    try data.write(to: URL(fileURLWithPath: output).appendingPathComponent("claude-menu-\(mode.rawValue).png"))
+                    try data.write(to: URL(fileURLWithPath: output).appendingPathComponent("claude-menu-\(mode.rawValue)\(suffix).png"))
                 }
             }
         }
