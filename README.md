@@ -43,6 +43,12 @@ Codex Reset Watcher is read-only. It does not redeem resets, reset usage, modify
 ## Settings and notifications
 
 Open **Settings** using the gear in the dropdown or **Command-comma** in the app.
+Turn off **General → Show Dock icon** to keep the watcher in the menu bar while
+hiding it from the Dock and Command-Tab. The choice applies immediately and is
+remembered after restart; it defaults to on. Use the menu dropdown's **Open**,
+gear, and **Quit** controls while the Dock icon is hidden. Closing the desktop
+window keeps the watcher running.
+
 **Launch at login** uses macOS Login Items and is off until you enable it. Keep
 the app in a stable location, such as `/Applications`; if approval is required,
 Settings links to macOS Login Items and shows the pending state.

@@ -2,6 +2,9 @@
 
 Codex Reset Watcher is read-only.
 
+Dock visibility is stored as a local Boolean preference and does not change
+account access, polling, or notification permissions.
+
 Optional local notifications are off by default. Enabling them requests macOS
 permission; no push service or additional network request is used. Notifications
 contain provider names and usage/expiry warnings, never account labels or IDs.

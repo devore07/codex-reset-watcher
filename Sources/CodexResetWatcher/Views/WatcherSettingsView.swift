@@ -3,12 +3,20 @@ import SwiftUI
 
 struct WatcherSettingsView: View {
     @ObservedObject var notifications: UsageNotifications
+    @AppStorage(AppDelegate.showDockIconKey) private var showDockIcon = true
     @State private var loginStatus = SMAppService.mainApp.status
     @State private var loginError: String?
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         Form {
+            Section("General") {
+                Toggle("Show Dock icon", isOn: $showDockIcon)
+                    .onChange(of: showDockIcon) { _, visible in AppDelegate.setDockIconVisible(visible) }
+                Text("When hidden, open the dashboard, Settings, or quit from the menu bar.")
+                    .font(CodexStyle.Typography.caption)
+                    .foregroundStyle(CodexPalette.secondaryText)
+            }
             Section("Startup") {
                 Toggle(
                     "Launch at login",
