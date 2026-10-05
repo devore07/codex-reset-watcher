@@ -113,7 +113,9 @@ the visual priority.
   copy before shrinking fonts.
 - Prefer `LimitMeterView` for every usage/capacity bar so color thresholds,
   clamping, and accessibility labels stay consistent.
-- Settings contains native launch-at-login and opt-in notification controls.
+- Settings contains Show Dock icon, native launch-at-login and opt-in notification controls.
+  Dock visibility defaults on, applies immediately and persists across launches.
+  Keep the menu bar and its Open, Settings and Quit actions usable in either mode.
   Keep these out of the appearance-only Display settings section. Surface denied
   notification permission and login approval/errors without silently claiming success.
 - Desktop reset rows must keep label/detail text and expiry dates in separate

@@ -14,23 +14,30 @@ Repository:
 https://github.com/devore07/codex-reset-watcher
 ```
 
-Current release:
+Release target (verify publication on GitHub):
 
 ```text
-v0.10.0 (published 2026-10-04; release workflow succeeded)
+v0.11.0
 ```
 
 Latest tracked release state:
 
 ```text
-v0.10.0 shipped: native Liquid Glass buttons and translucent window surfaces
+v0.11.0: saved Dock visibility setting
 ```
 
 Latest local release branch:
 
 ```text
-codex/liquid-glass (merged via PR #11 on 2026-10-04)
+codex/dock-icon-setting
 ```
+
+v0.11.0 adds **Settings → General → Show Dock icon**, default on. Turning it off
+uses the native accessory activation policy while retaining the menu bar and
+its Open, Settings and Quit controls. The choice applies immediately and is
+restored at launch. Closing a desktop window keeps the watcher running.
+The regression check uses isolated preferences and covers the default, both
+saved modes and live changes before preference persistence.
 
 v0.9.0 shipped the selected freshness, Compact timing, quiet notification and
 launch-at-login improvements through fork PR #10. Both optional OS features
@@ -44,7 +51,7 @@ Older systems keep native bordered controls and macOS 14 remains supported.
 CI and releases select Xcode 26.3. Provider state, credentials, source selection,
 menu sizing and the fixed desktop sidebar are unchanged.
 
-145 native tests and 15 portable Docker tests pass. Compact and Detailed menu
+146 native tests and 15 portable Docker tests pass. Compact and Detailed menu
 geometry passes in Auto/Light/Dark and high-contrast appearance fixtures. The
 packaged desktop and Settings were inspected; system materials use a subtle
 thick variant to keep Settings readable. Universal packaging, helper/privacy

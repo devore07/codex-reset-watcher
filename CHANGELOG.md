@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.11.0
+
+- Add a saved **Show Dock icon** toggle in Settings. Turn it off to hide the
+  watcher from the Dock and Command-Tab while keeping its menu bar available.
+  Changes apply immediately and survive app restarts; the default remains on.
+- Keep the dashboard, Settings, and Quit accessible from the menu bar in either
+  mode, including after the desktop window is closed.
+
 ## v0.10.0
 
 - Adopt a subtly translucent system window background, native Liquid Glass

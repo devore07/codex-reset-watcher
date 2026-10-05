@@ -10,9 +10,9 @@ Codex usage limits and reset credits. Keep changes scoped to that product.
 - Public GitHub repo: `https://github.com/jordan-edai/codex-reset-watcher`
 - Canonical local path: `/Users/everydayai/Documents/!Codex Projects/Rate Refresher Project`
 - Compatibility path: `/Users/everydayai/Documents/Rate Refresher Project`
-- App bundle target version: `v0.10.0`; verify GitHub for publication status.
+- App bundle target version: `v0.11.0`; verify GitHub for publication status.
 - Check `git log --oneline --decorate -5` for the current `main` commit; this
-  note tracks the repo state through the `v0.10.0` Liquid Glass appearance update.
+  note tracks the repo state through the `v0.11.0` Dock visibility setting.
 - App bundle version is set in `script/build_and_run.sh`.
 
 ## Product Decisions
@@ -118,6 +118,10 @@ Codex usage limits and reset credits. Keep changes scoped to that product.
   upcoming credit expirations. Persist hashed event keys/expiry times only for
   deduplication; do not persist raw account or credit IDs. Native tests inject
   notification delivery and use isolated preferences, without changing OS permissions.
+- Settings also has a saved Show Dock icon toggle, default on. Apply the native
+  regular/accessory activation policy at launch and when the preference changes.
+  Hiding the Dock icon must preserve menu-bar Open, Settings, and Quit actions;
+  closing a window must not quit the watcher.
 - The active desktop Dashboard shows Codex and Claude side by side; keep provider
   errors/loading independent and reset credits/advice under Codex. Cached snapshots
   remain separate from the live dashboard. Keep one shared Refresh and appearance
